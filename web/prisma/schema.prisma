@@ -1,0 +1,382 @@
+// Schema Prisma — Registro de Comprobantes Marangatu
+// Multi-tenant. Todo bajo `organizacion`. Naming snake_case via @map/@@map.
+// PKs como UUID (Postgres gen_random_uuid).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Enums
+// ───────────────────────────────────────────────────────────────────────────
+
+enum Rol {
+  ADMIN
+  OPERADOR
+}
+
+enum Regimen {
+  IVA
+  IRE
+  IRE_SIMPLE
+  IRP_RSP
+}
+
+enum OrigenComprobante {
+  MANUAL_PDF_IMG
+  E_KUATIA_XML
+}
+
+enum EstadoComprobante {
+  CARGADO
+  EXTRAYENDO
+  EXTRAIDO
+  EN_REVISION
+  REGISTRADO
+  PENDIENTE
+  RECHAZADO
+  DUPLICADO
+  REQUIERE_REVISION_MANUAL
+}
+
+enum StatusCampo {
+  CONFIABLE
+  DUDOSO
+  FALTANTE
+  REQUIERE_REVISION
+  EDITADO_MANUALMENTE
+}
+
+enum TipoExportacion {
+  MARANGATU_ZIP
+  PLANILLA_XLSX
+  LIBRO_IVA
+  LIBRO_IRP
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Tenancy y usuarios
+// ───────────────────────────────────────────────────────────────────────────
+
+model Organizacion {
+  id             String    @id @default(uuid()) @db.Uuid
+  nombre         String
+  slug           String    @unique
+  plan           String    @default("free")
+  activo         Boolean   @default(true)
+  creadoEn       DateTime  @default(now()) @map("creado_en")
+  actualizadoEn  DateTime  @updatedAt       @map("actualizado_en")
+
+  usuarios       Usuario[]
+  clientes       Cliente[]
+  archivos       Archivo[]
+  comprobantes   Comprobante[]
+  exportaciones  Exportacion[]
+  configuraciones ConfiguracionOrg[]
+  auditorias     AuditoriaCambio[]
+
+  @@map("organizacion")
+}
+
+model Usuario {
+  id              String    @id @default(uuid()) @db.Uuid
+  organizacionId  String    @map("organizacion_id") @db.Uuid
+  email           String    @unique
+  hashPassword    String    @map("hash_password")
+  nombre          String
+  rol             Rol       @default(OPERADOR)
+  activo          Boolean   @default(true)
+  creadoEn        DateTime  @default(now()) @map("creado_en")
+
+  organizacion    Organizacion       @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  archivosSubidos Archivo[]          @relation("ArchivoSubidoPor")
+  comprobantesCreados   Comprobante[] @relation("ComprobanteCreadoPor")
+  comprobantesAprobados Comprobante[] @relation("ComprobanteAprobadoPor")
+  exportaciones   Exportacion[]
+  auditorias      AuditoriaCambio[]
+
+  @@index([organizacionId])
+  @@map("usuario")
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Clientes del contador
+// ───────────────────────────────────────────────────────────────────────────
+
+model Cliente {
+  id              String    @id @default(uuid()) @db.Uuid
+  organizacionId  String    @map("organizacion_id") @db.Uuid
+  razonSocial     String    @map("razon_social")
+  ruc             String
+  dv              Int
+  regimen         Regimen[]
+  activo          Boolean   @default(true)
+  creadoEn        DateTime  @default(now()) @map("creado_en")
+  actualizadoEn   DateTime  @updatedAt       @map("actualizado_en")
+
+  organizacion    Organizacion  @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  archivos        Archivo[]
+  comprobantes    Comprobante[]
+  exportaciones   Exportacion[]
+
+  @@unique([organizacionId, ruc])
+  @@index([organizacionId])
+  @@map("cliente")
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Archivos físicos (PDF / imagen / XML)
+// ───────────────────────────────────────────────────────────────────────────
+
+model Archivo {
+  id              String    @id @default(uuid()) @db.Uuid
+  organizacionId  String    @map("organizacion_id") @db.Uuid
+  clienteId       String    @map("cliente_id") @db.Uuid
+  ruta            String
+  mime            String
+  tamanoBytes     BigInt    @map("tamano_bytes")
+  paginas         Int?
+  hashSha256      String    @map("hash_sha256") @db.Char(64)
+  subidoPorId     String    @map("subido_por") @db.Uuid
+  subidoEn        DateTime  @default(now()) @map("subido_en")
+
+  organizacion    Organizacion @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  cliente         Cliente      @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  subidoPor       Usuario      @relation("ArchivoSubidoPor", fields: [subidoPorId], references: [id])
+  comprobantes    Comprobante[]
+
+  @@unique([clienteId, hashSha256])
+  @@index([organizacionId])
+  @@map("archivo")
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Comprobante (entidad principal)
+// ───────────────────────────────────────────────────────────────────────────
+
+model Comprobante {
+  id              String    @id @default(uuid()) @db.Uuid
+  organizacionId  String    @map("organizacion_id") @db.Uuid
+  clienteId       String    @map("cliente_id") @db.Uuid
+
+  origen          OrigenComprobante @default(MANUAL_PDF_IMG)
+
+  // Cabeceras DNIT
+  tipoRegistro             Int       @map("tipo_registro") @db.SmallInt
+  tipoComprobante          Int       @map("tipo_comprobante") @db.SmallInt
+  fechaEmision             DateTime? @map("fecha_emision") @db.Date
+  periodo                  String?   // mm/yyyy para 208/206
+  timbrado                 String?
+  numero                   String?
+
+  // Contraparte
+  tipoIdentificacionContraparte Int?    @map("tipo_identificacion_contraparte") @db.SmallInt
+  rucContraparte                String? @map("ruc_contraparte")
+  dvContraparte                 Int?    @map("dv_contraparte")
+  nombreContraparte             String? @map("nombre_contraparte")
+
+  // Montos
+  moneda                       String   @default("PYG")
+  operacionMonedaExtranjera    String   @default("N") @map("operacion_moneda_extranjera") @db.Char(1)
+  montoGravado10               Decimal  @default(0) @map("monto_gravado_10") @db.Decimal(18, 0)
+  iva10                        Decimal  @default(0) @map("iva_10") @db.Decimal(18, 0)
+  montoGravado5                Decimal  @default(0) @map("monto_gravado_5") @db.Decimal(18, 0)
+  iva5                         Decimal  @default(0) @map("iva_5") @db.Decimal(18, 0)
+  exento                       Decimal  @default(0) @db.Decimal(18, 0)
+  total                        Decimal  @default(0) @db.Decimal(18, 0)
+
+  // Operativos
+  condicionOperacion           Int?     @map("condicion_operacion") @db.SmallInt
+  imputaIva                    String   @default("N") @map("imputa_iva") @db.Char(1)
+  imputaIre                    String   @default("N") @map("imputa_ire") @db.Char(1)
+  imputaIrpRsp                 String   @default("N") @map("imputa_irp_rsp") @db.Char(1)
+  noImputa                     String   @default("N") @map("no_imputa") @db.Char(1)
+
+  // Asociados (NC/ND)
+  comprobanteAsociadoNumero    String?  @map("comprobante_asociado_numero")
+  comprobanteAsociadoTimbrado  String?  @map("comprobante_asociado_timbrado")
+
+  // Específicos
+  especificarTipoDocumento     String?  @map("especificar_tipo_documento")
+  numeroCuenta                 String?  @map("numero_cuenta")
+  banco                        String?
+  identificadorEmpleadorIps    String?  @map("identificador_empleador_ips")
+
+  // Estado y trazabilidad
+  estado                       EstadoComprobante @default(CARGADO)
+  confianzaGeneral             Int?     @map("confianza_general") @db.SmallInt
+  archivoId                    String?  @map("archivo_id") @db.Uuid
+  hashArchivo                  String?  @map("hash_archivo") @db.Char(64)
+  geminiRequestId              String?  @map("gemini_request_id")
+  geminiModelo                 String?  @map("gemini_modelo")
+
+  creadoPorId                  String   @map("creado_por") @db.Uuid
+  aprobadoPorId                String?  @map("aprobado_por") @db.Uuid
+  aprobadoEn                   DateTime? @map("aprobado_en")
+  registradoEn                 DateTime? @map("registrado_en")
+  creadoEn                     DateTime @default(now()) @map("creado_en")
+  actualizadoEn                DateTime @updatedAt        @map("actualizado_en")
+
+  organizacion                 Organizacion @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  cliente                      Cliente      @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  archivo                      Archivo?     @relation(fields: [archivoId], references: [id])
+  creadoPor                    Usuario      @relation("ComprobanteCreadoPor", fields: [creadoPorId], references: [id])
+  aprobadoPor                  Usuario?     @relation("ComprobanteAprobadoPor", fields: [aprobadoPorId], references: [id])
+  campos                       CampoExtraido[]
+
+  // Detección de duplicados: combinación natural del comprobante
+  @@unique([clienteId, rucContraparte, timbrado, numero, fechaEmision], name: "comprobante_natural_key")
+  @@index([organizacionId])
+  @@index([clienteId, fechaEmision])
+  @@index([clienteId, estado])
+  @@map("comprobante")
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Campos extraídos por Gemini (auditoría de calidad del modelo)
+// ───────────────────────────────────────────────────────────────────────────
+
+model CampoExtraido {
+  id              String       @id @default(uuid()) @db.Uuid
+  comprobanteId   String       @map("comprobante_id") @db.Uuid
+  campo           String
+  valorExtraido   String?      @map("valor_extraido")
+  valorFinal      String?      @map("valor_final")
+  confianza       Int?         @db.SmallInt
+  status          StatusCampo  @default(REQUIERE_REVISION)
+  observacion     String?
+  ubicacionBbox   Json?        @map("ubicacion_bbox")
+
+  comprobante     Comprobante  @relation(fields: [comprobanteId], references: [id], onDelete: Cascade)
+
+  @@index([comprobanteId])
+  @@map("campo_extraido")
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Auditoría
+// ───────────────────────────────────────────────────────────────────────────
+
+model AuditoriaCambio {
+  id              String    @id @default(uuid()) @db.Uuid
+  organizacionId  String    @map("organizacion_id") @db.Uuid
+  entidad         String
+  idEntidad       String    @map("id_entidad") @db.Uuid
+  campo           String
+  valorAnterior   String?   @map("valor_anterior")
+  valorNuevo      String?   @map("valor_nuevo")
+  usuarioId       String    @map("usuario_id") @db.Uuid
+  motivo          String?
+  creadoEn        DateTime  @default(now()) @map("creado_en")
+
+  organizacion    Organizacion @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  usuario         Usuario      @relation(fields: [usuarioId], references: [id])
+
+  @@index([organizacionId])
+  @@index([entidad, idEntidad])
+  @@map("auditoria_cambio")
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Exportaciones generadas
+// ───────────────────────────────────────────────────────────────────────────
+
+model Exportacion {
+  id                  String    @id @default(uuid()) @db.Uuid
+  organizacionId      String    @map("organizacion_id") @db.Uuid
+  clienteId           String    @map("cliente_id") @db.Uuid
+  tipo                TipoExportacion
+  periodo             String    // MMYYYY o YYYY
+  obligacion          Int?      @db.SmallInt   // 955 o 956
+  rutaArchivo         String    @map("ruta_archivo")
+  hashArchivo         String    @map("hash_archivo") @db.Char(64)
+  registrosIncluidos  Int       @map("registros_incluidos")
+  creadoPorId         String    @map("creado_por") @db.Uuid
+  creadoEn            DateTime  @default(now()) @map("creado_en")
+
+  organizacion        Organizacion @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  cliente             Cliente      @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  creadoPor           Usuario      @relation(fields: [creadoPorId], references: [id])
+
+  @@index([organizacionId])
+  @@index([clienteId, periodo])
+  @@map("exportacion")
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Configuración por organización (incluye API Key Gemini cifrada)
+// ───────────────────────────────────────────────────────────────────────────
+
+model ConfiguracionOrg {
+  id              String    @id @default(uuid()) @db.Uuid
+  organizacionId  String    @map("organizacion_id") @db.Uuid
+  clave           String
+  valor           String?
+  valorCifrado    Bytes?    @map("valor_cifrado")
+  actualizadoEn   DateTime  @updatedAt @map("actualizado_en")
+  actualizadoPorId String?  @map("actualizado_por") @db.Uuid
+
+  organizacion    Organizacion @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+
+  @@unique([organizacionId, clave])
+  @@map("configuracion_org")
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Catálogos versionados (Tablas 1–5 SET, junio/2021)
+// ───────────────────────────────────────────────────────────────────────────
+
+model CatalogoTipoRegistro {
+  codigo        Int       @id @db.SmallInt
+  descripcion   String
+  vigenteDesde  DateTime  @map("vigente_desde") @db.Date
+  vigenteHasta  DateTime? @map("vigente_hasta") @db.Date
+
+  @@map("catalogo_tipo_registro")
+}
+
+model CatalogoCondicion {
+  codigo        Int       @id @db.SmallInt
+  descripcion   String
+  vigenteDesde  DateTime  @map("vigente_desde") @db.Date
+  vigenteHasta  DateTime? @map("vigente_hasta") @db.Date
+
+  @@map("catalogo_condicion")
+}
+
+model CatalogoTipoIdentificacion {
+  codigo        Int       @id @db.SmallInt
+  descripcion   String
+  vigenteDesde  DateTime  @map("vigente_desde") @db.Date
+  vigenteHasta  DateTime? @map("vigente_hasta") @db.Date
+
+  @@map("catalogo_tipo_identificacion")
+}
+
+model CatalogoTipoComprobante {
+  codigo                     Int       @id @db.SmallInt
+  descripcion                String
+  // Tipos de registro permitidos (1..4) como array
+  tiposRegistroPermitidos    Int[]     @map("tipos_registro_permitidos") @db.SmallInt
+  // Reglas excepcionales: ej. 107 sin timbrado, 112/106 sin número
+  requiereTimbrado           Boolean   @default(true) @map("requiere_timbrado")
+  requiereNumero             Boolean   @default(true) @map("requiere_numero")
+  permiteGravado             Boolean   @default(true) @map("permite_gravado")
+  notas                      String?
+  vigenteDesde               DateTime  @map("vigente_desde") @db.Date
+  vigenteHasta               DateTime? @map("vigente_hasta") @db.Date
+
+  @@map("catalogo_tipo_comprobante")
+}
+
+model CatalogoBooleano {
+  codigo        String    @id @db.Char(1)
+  descripcion   String
+
+  @@map("catalogo_booleano")
+}
