@@ -60,6 +60,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <NavLink href="/app/comprobantes">Comprobantes</NavLink>
             <NavLink href="/app/exportaciones">Exportaciones</NavLink>
             <NavLink href="/app/auditoria">Auditoría</NavLink>
+            {session.user.rol === "ADMIN" && (
+              <NavLink href="/app/usuarios">Usuarios</NavLink>
+            )}
             <NavLink href="/app/configuracion">Configuración</NavLink>
           </nav>
           {clienteActivo && (

@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getClienteActivo } from "@/lib/cliente-activo";
+import type { Prisma } from "@/generated/prisma/client";
+import type { EstadoComprobante } from "@/generated/prisma/enums";
 
 export const metadata = { title: "Comprobantes" };
 
@@ -32,9 +34,22 @@ const ESTADO_BADGE: Record<string, string> = {
   REQUIERE_REVISION_MANUAL: "bg-red-100 text-red-700",
 };
 
+// Valid enum values for runtime validation
+const ESTADOS_VALIDOS: EstadoComprobante[] = [
+  "CARGADO",
+  "EXTRAYENDO",
+  "EXTRAIDO",
+  "EN_REVISION",
+  "REGISTRADO",
+  "RECHAZADO",
+  "DUPLICADO",
+];
+
 // ── Página ─────────────────────────────────────────────────────────────────
 
-export default async function ComprobantesPage() {
+export default async function ComprobantesPage(props: {
+  searchParams: Promise<Record<string, string>>;
+}) {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
@@ -53,13 +68,47 @@ export default async function ComprobantesPage() {
     );
   }
 
+  const params = await props.searchParams;
+  const estadoParam = params.estado ?? "";
+  const q = params.q?.trim() ?? "";
+  const desde = params.desde ?? "";
+  const hasta = params.hasta ?? "";
+
+  // Build where clause
+  const andClauses: Prisma.ComprobanteWhereInput[] = [];
+
+  if (estadoParam && (ESTADOS_VALIDOS as string[]).includes(estadoParam)) {
+    andClauses.push({ estado: estadoParam as EstadoComprobante });
+  }
+
+  if (q) {
+    andClauses.push({
+      OR: [
+        { numero: { contains: q, mode: "insensitive" } },
+        { timbrado: { contains: q } },
+        { nombreContraparte: { contains: q, mode: "insensitive" } },
+        { rucContraparte: { contains: q } },
+      ],
+    });
+  }
+
+  if (desde || hasta) {
+    const fechaFilter: { gte?: Date; lte?: Date } = {};
+    if (desde) fechaFilter.gte = new Date(desde);
+    if (hasta) fechaFilter.lte = new Date(hasta);
+    andClauses.push({ fechaEmision: fechaFilter });
+  }
+
+  const where: Prisma.ComprobanteWhereInput = {
+    organizacionId: session.user.organizacionId,
+    clienteId: clienteActivo.id,
+    ...(andClauses.length > 0 ? { AND: andClauses } : {}),
+  };
+
   const comprobantes = await prisma.comprobante.findMany({
-    where: {
-      organizacionId: session.user.organizacionId,
-      clienteId: clienteActivo.id,
-    },
+    where,
     orderBy: { creadoEn: "desc" },
-    take: 200,
+    take: 100,
     select: {
       id: true,
       estado: true,
@@ -72,6 +121,8 @@ export default async function ComprobantesPage() {
       nombreContraparte: true,
     },
   });
+
+  const hayFiltros = !!estadoParam || !!q || !!desde || !!hasta;
 
   return (
     <div>
@@ -94,21 +145,134 @@ export default async function ComprobantesPage() {
         </Link>
       </div>
 
+      {/* Barra de filtros */}
+      <form
+        method="get"
+        action="/app/comprobantes"
+        className="mt-6 flex flex-wrap items-end gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3"
+      >
+        {/* Estado */}
+        <div>
+          <label
+            htmlFor="filtro-estado"
+            className="block text-xs font-medium text-gray-600"
+          >
+            Estado
+          </label>
+          <select
+            id="filtro-estado"
+            name="estado"
+            defaultValue={estadoParam}
+            className="mt-1 rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm"
+          >
+            <option value="">Todos</option>
+            <option value="CARGADO">Cargado</option>
+            <option value="EXTRAYENDO">Extrayendo</option>
+            <option value="EXTRAIDO">Extraído</option>
+            <option value="EN_REVISION">En revisión</option>
+            <option value="REGISTRADO">Registrado</option>
+            <option value="RECHAZADO">Rechazado</option>
+            <option value="DUPLICADO">Duplicado</option>
+          </select>
+        </div>
+
+        {/* Búsqueda */}
+        <div>
+          <label
+            htmlFor="filtro-q"
+            className="block text-xs font-medium text-gray-600"
+          >
+            Búsqueda
+          </label>
+          <input
+            id="filtro-q"
+            name="q"
+            type="text"
+            defaultValue={q}
+            placeholder="N°, timbrado, contraparte, RUC…"
+            className="mt-1 w-56 rounded-md border border-gray-300 px-2 py-1.5 text-sm"
+          />
+        </div>
+
+        {/* Desde */}
+        <div>
+          <label
+            htmlFor="filtro-desde"
+            className="block text-xs font-medium text-gray-600"
+          >
+            Desde
+          </label>
+          <input
+            id="filtro-desde"
+            name="desde"
+            type="date"
+            defaultValue={desde}
+            className="mt-1 rounded-md border border-gray-300 px-2 py-1.5 text-sm"
+          />
+        </div>
+
+        {/* Hasta */}
+        <div>
+          <label
+            htmlFor="filtro-hasta"
+            className="block text-xs font-medium text-gray-600"
+          >
+            Hasta
+          </label>
+          <input
+            id="filtro-hasta"
+            name="hasta"
+            type="date"
+            defaultValue={hasta}
+            className="mt-1 rounded-md border border-gray-300 px-2 py-1.5 text-sm"
+          />
+        </div>
+
+        {/* Acciones */}
+        <div className="flex gap-2">
+          <button
+            type="submit"
+            className="rounded-md bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700"
+          >
+            Filtrar
+          </button>
+          {hayFiltros && (
+            <Link
+              href="/app/comprobantes"
+              className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Limpiar
+            </Link>
+          )}
+        </div>
+      </form>
+
+      {/* Contador */}
+      <p className="mt-3 text-sm text-gray-500">
+        Mostrando <strong>{comprobantes.length}</strong>{" "}
+        {comprobantes.length === 1 ? "comprobante" : "comprobantes"}
+        {hayFiltros ? " (con filtros activos)" : ""}
+      </p>
+
       {/* Lista */}
       {comprobantes.length === 0 ? (
-        <div className="mt-8 rounded-xl border border-dashed border-gray-300 p-10 text-center">
+        <div className="mt-4 rounded-xl border border-dashed border-gray-300 p-10 text-center">
           <p className="text-sm text-gray-600">
-            Aún no hay comprobantes para <strong>{clienteActivo.razonSocial}</strong>.
+            {hayFiltros
+              ? "No se encontraron comprobantes con los filtros aplicados."
+              : `Aún no hay comprobantes para ${clienteActivo.razonSocial}.`}
           </p>
-          <Link
-            href="/app/comprobantes/nuevo"
-            className="mt-5 inline-block rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700"
-          >
-            Cargar el primero
-          </Link>
+          {!hayFiltros && (
+            <Link
+              href="/app/comprobantes/nuevo"
+              className="mt-5 inline-block rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700"
+            >
+              Cargar el primero
+            </Link>
+          )}
         </div>
       ) : (
-        <div className="mt-6 overflow-hidden rounded-lg border border-gray-200">
+        <div className="mt-3 overflow-hidden rounded-lg border border-gray-200">
           <table className="min-w-full divide-y divide-gray-200 text-sm">
             <thead className="bg-gray-50">
               <tr>
@@ -188,9 +352,9 @@ export default async function ComprobantesPage() {
             </tbody>
           </table>
 
-          {comprobantes.length === 200 && (
+          {comprobantes.length === 100 && (
             <p className="border-t border-gray-100 px-4 py-2 text-center text-xs text-gray-500">
-              Mostrando los últimos 200 comprobantes. Usá filtros para ver más (disponible en F3).
+              Mostrando los primeros 100 resultados. Usá los filtros para acotar la búsqueda.
             </p>
           )}
         </div>
