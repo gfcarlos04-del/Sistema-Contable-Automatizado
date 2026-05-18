@@ -90,3 +90,14 @@ export async function presignedGetUrl(key: string, expiresInSeconds = 300) {
     expiresIn: expiresInSeconds,
   });
 }
+
+export async function getObject(key: string): Promise<Buffer> {
+  const { client, bucket } = getClient();
+  const res = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+  if (!res.Body) throw new Error("R2: objeto vacío");
+  const chunks: Uint8Array[] = [];
+  for await (const chunk of res.Body as AsyncIterable<Uint8Array>) {
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks);
+}

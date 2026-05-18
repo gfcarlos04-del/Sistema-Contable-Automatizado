@@ -3,6 +3,8 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { VisorArchivo } from "../VisorArchivo";
+import { FormRevision } from "./FormRevision";
+import { ProcesandoPoller } from "./ProcesandoPoller";
 
 export const metadata = { title: "Comprobante" };
 
@@ -37,17 +39,6 @@ function formatBytes(n: bigint | number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function Campo({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div>
-      <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase">{label}</dt>
-      <dd className="mt-0.5 text-sm text-gray-900">
-        {value ?? <span className="text-gray-400 italic">—</span>}
-      </dd>
-    </div>
-  );
 }
 
 // ── Página ─────────────────────────────────────────────────────────────────
@@ -89,10 +80,41 @@ export default async function ComprobanteDetallePage(props: { params: Promise<{ 
 
   if (!comprobante) notFound();
 
-  const esPendiente = comprobante.tipoComprobante === 0;
+  const estado = comprobante.estado;
+  const isProcesando = estado === "CARGADO" || estado === "EXTRAYENDO";
+  const isReadOnly = estado === "REGISTRADO" || estado === "RECHAZADO";
+  const showForm = !isProcesando;
+
+  // Build initial form values
+  const initial = {
+    tipoRegistro: comprobante.tipoRegistro,
+    tipoComprobante: comprobante.tipoComprobante,
+    fechaEmision: comprobante.fechaEmision
+      ? comprobante.fechaEmision.toISOString().slice(0, 10)
+      : null,
+    timbrado: comprobante.timbrado,
+    numero: comprobante.numero,
+    rucContraparte: comprobante.rucContraparte,
+    dvContraparte: comprobante.dvContraparte,
+    nombreContraparte: comprobante.nombreContraparte,
+    tipoIdentificacionContraparte: comprobante.tipoIdentificacionContraparte,
+    montoGravado10: Number(comprobante.montoGravado10),
+    iva10: Number(comprobante.iva10),
+    montoGravado5: Number(comprobante.montoGravado5),
+    iva5: Number(comprobante.iva5),
+    exento: Number(comprobante.exento),
+    total: Number(comprobante.total),
+    condicionOperacion: comprobante.condicionOperacion,
+    imputaIva: comprobante.imputaIva,
+    imputaIre: comprobante.imputaIre,
+    imputaIrpRsp: comprobante.imputaIrpRsp,
+    noImputa: comprobante.noImputa,
+    comprobanteAsociadoNumero: comprobante.comprobanteAsociadoNumero,
+    comprobanteAsociadoTimbrado: comprobante.comprobanteAsociadoTimbrado,
+  };
 
   return (
-    <div className="max-w-4xl space-y-6">
+    <div className="max-w-6xl space-y-6">
       {/* Encabezado */}
       <div className="flex items-center gap-3">
         <Link
@@ -122,9 +144,9 @@ export default async function ComprobanteDetallePage(props: { params: Promise<{ 
                 : "Comprobante"}
             </h1>
             <span
-              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${ESTADO_BADGE[comprobante.estado] ?? "bg-gray-100 text-gray-700"}`}
+              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${ESTADO_BADGE[estado] ?? "bg-gray-100 text-gray-700"}`}
             >
-              {ESTADO_LABEL[comprobante.estado] ?? comprobante.estado}
+              {ESTADO_LABEL[estado] ?? estado}
             </span>
           </div>
           <p className="mt-0.5 text-sm text-gray-500">
@@ -134,9 +156,40 @@ export default async function ComprobanteDetallePage(props: { params: Promise<{ 
             </strong>
           </p>
         </div>
+
+        {/* Info metadata */}
+        <div className="hidden text-right text-xs text-gray-400 lg:block">
+          {comprobante.geminiModelo && <p>Modelo: {comprobante.geminiModelo}</p>}
+          {comprobante.confianzaGeneral != null && (
+            <p>Confianza: {comprobante.confianzaGeneral}%</p>
+          )}
+        </div>
       </div>
 
-      {/* Layout: visor + datos */}
+      {/* Processing banner */}
+      {isProcesando && <ProcesandoPoller />}
+
+      {/* REGISTRADO read-only banner */}
+      {estado === "REGISTRADO" && (
+        <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+          <strong>Registrado</strong>
+          {comprobante.aprobadoEn && (
+            <span className="ml-2">
+              el {new Date(comprobante.aprobadoEn).toLocaleDateString("es-PY")}
+            </span>
+          )}
+          . Este comprobante ya fue aprobado y no puede modificarse.
+        </div>
+      )}
+
+      {/* RECHAZADO banner */}
+      {estado === "RECHAZADO" && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <strong>Rechazado.</strong> Este comprobante fue descartado.
+        </div>
+      )}
+
+      {/* Layout: visor + form */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Visor del archivo */}
         <div className="lg:col-span-1">
@@ -163,137 +216,21 @@ export default async function ComprobanteDetallePage(props: { params: Promise<{ 
           )}
         </div>
 
-        {/* Datos del comprobante */}
-        <div className="space-y-6">
-          {/* Aviso si pendiente extracción */}
-          {esPendiente ? (
-            <div className="rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-700">
-              <strong>Extracción pendiente.</strong> Gemini procesará este comprobante cuando esté
-              configurado (Fase 2). Los datos aparecerán aquí una vez extraídos.
-            </div>
+        {/* Formulario de revisión */}
+        <div className="lg:col-span-1">
+          {showForm ? (
+            <FormRevision
+              comprobanteId={comprobante.id}
+              initial={initial}
+              campos={comprobante.campos}
+              readOnly={isReadOnly}
+            />
           ) : (
-            <>
-              {/* Identificación */}
-              <section>
-                <h2 className="mb-3 text-sm font-semibold text-gray-700">Identificación</h2>
-                <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
-                  <Campo label="Timbrado" value={comprobante.timbrado} />
-                  <Campo label="Número" value={comprobante.numero} />
-                  <Campo
-                    label="Fecha de emisión"
-                    value={
-                      comprobante.fechaEmision
-                        ? new Date(comprobante.fechaEmision).toLocaleDateString("es-PY")
-                        : null
-                    }
-                  />
-                  <Campo label="Período" value={comprobante.periodo} />
-                </dl>
-              </section>
-
-              {/* Contraparte */}
-              <section>
-                <h2 className="mb-3 text-sm font-semibold text-gray-700">Contraparte</h2>
-                <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
-                  <Campo label="Nombre / Razón social" value={comprobante.nombreContraparte} />
-                  <Campo
-                    label="RUC"
-                    value={
-                      comprobante.rucContraparte
-                        ? `${comprobante.rucContraparte}-${comprobante.dvContraparte ?? "?"}`
-                        : null
-                    }
-                  />
-                </dl>
-              </section>
-
-              {/* Montos */}
-              <section>
-                <h2 className="mb-3 text-sm font-semibold text-gray-700">Montos (₲)</h2>
-                <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
-                  <Campo
-                    label="Gravado 10%"
-                    value={Number(comprobante.montoGravado10).toLocaleString("es-PY")}
-                  />
-                  <Campo
-                    label="IVA 10%"
-                    value={Number(comprobante.iva10).toLocaleString("es-PY")}
-                  />
-                  <Campo
-                    label="Gravado 5%"
-                    value={Number(comprobante.montoGravado5).toLocaleString("es-PY")}
-                  />
-                  <Campo label="IVA 5%" value={Number(comprobante.iva5).toLocaleString("es-PY")} />
-                  <Campo
-                    label="Exento"
-                    value={Number(comprobante.exento).toLocaleString("es-PY")}
-                  />
-                  <Campo
-                    label="Total"
-                    value={
-                      <span className="text-base font-semibold">
-                        {Number(comprobante.total).toLocaleString("es-PY")}
-                      </span>
-                    }
-                  />
-                </dl>
-              </section>
-            </>
+            <div className="rounded-lg border border-gray-200 p-6 text-sm text-gray-500">
+              Los datos de extracción aparecerán aquí una vez que Gemini termine de procesar el
+              comprobante.
+            </div>
           )}
-
-          {/* Campos extraídos por Gemini (solo si existen) */}
-          {comprobante.campos.length > 0 && (
-            <section>
-              <h2 className="mb-3 text-sm font-semibold text-gray-700">
-                Detalle de extracción Gemini
-              </h2>
-              <div className="overflow-hidden rounded-lg border border-gray-200">
-                <table className="min-w-full divide-y divide-gray-100 text-xs">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">Campo</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">Extraído</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-600">Confianza</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 bg-white">
-                    {comprobante.campos.map((c) => (
-                      <tr key={c.campo}>
-                        <td className="px-3 py-2 font-mono text-gray-700">{c.campo}</td>
-                        <td className="px-3 py-2 text-gray-900">
-                          {c.valorFinal ?? c.valorExtraido ?? "—"}
-                        </td>
-                        <td className="px-3 py-2 text-gray-500">
-                          {c.confianza != null ? `${c.confianza}%` : "—"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          )}
-
-          {/* Metadatos internos */}
-          <section>
-            <h2 className="mb-3 text-sm font-semibold text-gray-700">Información interna</h2>
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
-              <Campo
-                label="Cargado"
-                value={new Date(comprobante.creadoEn).toLocaleString("es-PY")}
-              />
-              <Campo
-                label="Origen"
-                value={comprobante.origen === "MANUAL_PDF_IMG" ? "PDF / Imagen" : "e-Kuatia XML"}
-              />
-              {comprobante.geminiModelo && (
-                <Campo label="Modelo Gemini" value={comprobante.geminiModelo} />
-              )}
-              {comprobante.confianzaGeneral != null && (
-                <Campo label="Confianza general" value={`${comprobante.confianzaGeneral}%`} />
-              )}
-            </dl>
-          </section>
         </div>
       </div>
     </div>
