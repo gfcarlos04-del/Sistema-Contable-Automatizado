@@ -161,6 +161,125 @@ function addSheetData(
   });
 }
 
+// ── IRP sheet builders ─────────────────────────────────────────────────────
+
+const IRP_INGRESOS_HEADERS = [
+  "Tipo Ident.",
+  "N° Ident.",
+  "Nombre/Razón Social",
+  "Tipo Comp.",
+  "Número",
+  "Fecha / Mes",
+  "Importe Total",
+  "Ingreso Gravado IRP",
+  "Ingreso No Grav./Exonerado IRP",
+];
+
+const IRP_EGRESOS_HEADERS = [
+  "Tipo Ident.",
+  "N° Ident.",
+  "Nombre/Razón Social",
+  "Tipo Comp.",
+  "Timbrado",
+  "Número",
+  "Condición",
+  "Fecha",
+  "Importe Total",
+  "Egreso Deducible IRP",
+];
+
+function buildIrpIngresosRow(c: ComprobanteExportar): (string | number)[] {
+  const total = toNum(c.total);
+  return [
+    c.tipoIdentificacionContraparte ?? "",
+    s(c.rucContraparte),
+    s(c.nombreContraparte),
+    c.tipoComprobante,
+    s(c.numero),
+    formatFecha(c.fechaEmision),
+    total,
+    c.imputaIrpRsp === "S" ? total : 0, // gravado si imputa IRP-RSP
+    c.imputaIrpRsp === "S" ? 0 : total, // no gravado si no imputa
+  ];
+}
+
+function buildIrpEgresosRow(c: ComprobanteExportar): (string | number)[] {
+  const total = toNum(c.total);
+  return [
+    c.tipoIdentificacionContraparte ?? "",
+    s(c.rucContraparte),
+    s(c.nombreContraparte),
+    c.tipoComprobante,
+    s(c.timbrado),
+    s(c.numero),
+    c.condicionOperacion ?? "",
+    formatFecha(c.fechaEmision),
+    total,
+    c.imputaIrpRsp === "S" ? total : 0,
+  ];
+}
+
+function addIrpSheetData(
+  sheet: ExcelJS.Worksheet,
+  headers: string[],
+  rows: (string | number)[][],
+  cliente: { razonSocial: string; ruc: string; dv: number },
+  anio: number,
+): void {
+  sheet.getRow(1).getCell(1).value = "RUC Informante:";
+  sheet.getRow(1).getCell(2).value = `${cliente.ruc}-${cliente.dv}`;
+  sheet.getRow(2).getCell(1).value = "Nombre/Razón Social:";
+  sheet.getRow(2).getCell(2).value = cliente.razonSocial;
+  sheet.getRow(3).getCell(1).value = "Ejercicio Fiscal:";
+  sheet.getRow(3).getCell(2).value = anio;
+
+  const headerRow = sheet.getRow(10);
+  headers.forEach((h, i) => {
+    const cell = headerRow.getCell(i + 1);
+    cell.value = h;
+    cell.font = { bold: true };
+    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE5E7EB" } };
+  });
+  headerRow.commit();
+
+  rows.forEach((row, idx) => {
+    const excelRow = sheet.getRow(11 + idx);
+    row.forEach((val, i) => {
+      excelRow.getCell(i + 1).value = val;
+    });
+    excelRow.commit();
+  });
+}
+
+export async function buildLibroIrpExcel(
+  comprobantes: ComprobanteExportar[],
+  cliente: { razonSocial: string; ruc: string; dv: number },
+  anio: number,
+): Promise<Buffer> {
+  // Ingresos = tipoRegistro 1 (ventas) y 3 (ingresos)
+  const ingresos = comprobantes
+    .filter((c) => c.tipoRegistro === 1 || c.tipoRegistro === 3)
+    .map(buildIrpIngresosRow);
+
+  // Egresos = tipoRegistro 2 (compras) y 4 (egresos)
+  const egresos = comprobantes
+    .filter((c) => c.tipoRegistro === 2 || c.tipoRegistro === 4)
+    .map(buildIrpEgresosRow);
+
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = "Tavex";
+  workbook.created = new Date();
+
+  const sheetIngresos = workbook.addWorksheet("INGRESOS IRP");
+  const sheetEgresos = workbook.addWorksheet("EGRESOS IRP");
+
+  addIrpSheetData(sheetIngresos, IRP_INGRESOS_HEADERS, ingresos, cliente, anio);
+  addIrpSheetData(sheetEgresos, IRP_EGRESOS_HEADERS, egresos, cliente, anio);
+
+  const arrayBuffer = await workbook.xlsx.writeBuffer();
+  return Buffer.from(arrayBuffer);
+}
+
 // ── Public function ───────────────────────────────────────────────────────
 
 export async function buildLibroIvaExcel(

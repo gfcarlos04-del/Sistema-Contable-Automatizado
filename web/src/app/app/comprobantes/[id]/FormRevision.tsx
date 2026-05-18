@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import {
   guardarCampos,
   aprobarComprobante,
@@ -151,6 +151,28 @@ export function FormRevision({
     null,
   );
 
+  const [clientError, setClientError] = useState<string | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  function validateForm(): string | null {
+    if (!formRef.current) return null;
+    const fd = new globalThis.FormData(formRef.current);
+    const total = parseInt(fd.get("total") as string, 10) || 0;
+    const fechaEmision = (fd.get("fechaEmision") as string) ?? "";
+    const tipoComprobante = parseInt(fd.get("tipoComprobante") as string, 10);
+
+    if (total <= 0) return "El total debe ser mayor a 0.";
+    if (!fechaEmision) return "La fecha de emisión es obligatoria.";
+    if (tipoComprobante === 0) return "Seleccioná el tipo de comprobante.";
+    const imputaIva = fd.get("imputaIva") === "S";
+    const imputaIre = fd.get("imputaIre") === "S";
+    const imputaIrpRsp = fd.get("imputaIrpRsp") === "S";
+    const noImputa = fd.get("noImputa") === "S";
+    if (!imputaIva && !imputaIre && !imputaIrpRsp && !noImputa)
+      return "Marcá al menos una imputación (IVA, IRE, IRP-RSP o No Imputa).";
+    return null;
+  }
+
   const [rejectMotivo, setRejectMotivo] = useState("");
   const [rejectResult, rejectAction, rejecting] = useActionState(
     async (_prev: { ok: boolean; errors?: ErrorValidacion[] } | null) => {
@@ -167,15 +189,18 @@ export function FormRevision({
   );
 
   const errors = approveResult?.errors ?? saveResult?.errors ?? [];
+  const allErrors = clientError
+    ? [{ codigo: "CLIENT", mensaje: clientError, nivel: "BLOQ" as const }, ...errors]
+    : errors;
 
   return (
     <div className="space-y-6">
       {/* Error list */}
-      {errors.length > 0 && (
+      {allErrors.length > 0 && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4">
           <p className="mb-2 text-sm font-medium text-red-800">Errores de validación:</p>
           <ul className="list-inside list-disc space-y-1">
-            {errors.map((e) => (
+            {allErrors.map((e) => (
               <li key={e.codigo} className="text-sm text-red-700">
                 <strong>[{e.codigo}]</strong> {e.mensaje}
               </li>
@@ -190,7 +215,20 @@ export function FormRevision({
         </div>
       )}
 
-      <form action={saveAction} className="space-y-6">
+      <form
+        ref={formRef}
+        action={saveAction}
+        onSubmit={(e) => {
+          const err = validateForm();
+          if (err) {
+            e.preventDefault();
+            setClientError(err);
+          } else {
+            setClientError(null);
+          }
+        }}
+        className="space-y-6"
+      >
         {/* Tipo de registro y comprobante */}
         <section>
           <h3 className="mb-3 text-sm font-semibold text-gray-700">Clasificación</h3>
@@ -521,7 +559,18 @@ export function FormRevision({
       {/* Approve / Reject / Re-extract — separate forms */}
       {!readOnly && (
         <div className="flex flex-wrap items-center gap-3 border-t border-gray-100 pt-4">
-          <form action={approveAction}>
+          <form
+            action={approveAction}
+            onSubmit={(e) => {
+              const err = validateForm();
+              if (err) {
+                e.preventDefault();
+                setClientError(err);
+              } else {
+                setClientError(null);
+              }
+            }}
+          >
             <button
               type="submit"
               disabled={approving}

@@ -5,6 +5,7 @@ import { getClienteActivo } from "@/lib/cliente-activo";
 import { presignedGetUrl } from "@/lib/storage";
 import { GenerarExportacion } from "./GenerarExportacion";
 import { GenerarLibroIva } from "./GenerarLibroIva";
+import { GenerarLibroIrp } from "./GenerarLibroIrp";
 
 export const metadata = { title: "Exportaciones" };
 
@@ -85,6 +86,11 @@ export default async function ExportacionesPage() {
       />
 
       <GenerarLibroIva
+        clienteId={clienteActivo.id}
+        clienteNombre={`${clienteActivo.razonSocial} (${clienteActivo.ruc}-${clienteActivo.dv})`}
+      />
+
+      <GenerarLibroIrp
         clienteId={clienteActivo.id}
         clienteNombre={`${clienteActivo.razonSocial} (${clienteActivo.ruc}-${clienteActivo.dv})`}
       />

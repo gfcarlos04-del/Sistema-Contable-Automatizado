@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { buildZipMara, type ComprobanteExportar } from "@/lib/exportar";
+import { buildLibroIrpExcel } from "@/lib/exportar-excel";
+import type { ComprobanteExportar } from "@/lib/exportar";
 import { putObject, presignedGetUrl } from "@/lib/storage";
 import crypto from "node:crypto";
 
@@ -11,57 +12,45 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  let body: { clienteId?: string; periodo?: string };
+  let body: { clienteId?: string; anio?: number };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Body inválido" }, { status: 400 });
   }
 
-  const { clienteId, periodo } = body;
+  const { clienteId, anio } = body;
 
-  if (!clienteId || !periodo) {
-    return NextResponse.json({ error: "clienteId y periodo son obligatorios" }, { status: 400 });
+  if (!clienteId || !anio) {
+    return NextResponse.json({ error: "clienteId y anio son obligatorios" }, { status: 400 });
   }
 
-  // Validate periodo format MM/YYYY
-  if (!/^\d{2}\/\d{4}$/.test(periodo)) {
-    return NextResponse.json({ error: "periodo debe tener formato MM/YYYY" }, { status: 400 });
+  if (!Number.isInteger(anio) || anio < 2021 || anio > 2100) {
+    return NextResponse.json({ error: "anio debe ser un año válido (>= 2021)" }, { status: 400 });
   }
 
-  const [mm, yyyy] = periodo.split("/");
-  const periodoStr = `${yyyy}-${mm}`; // for DB period matching
+  const { organizacionId } = session.user;
 
   // Verify cliente belongs to org
   const cliente = await prisma.cliente.findFirst({
-    where: {
-      id: clienteId,
-      organizacionId: session.user.organizacionId,
-      activo: true,
-    },
+    where: { id: clienteId, organizacionId, activo: true },
     select: { id: true, ruc: true, dv: true, razonSocial: true },
   });
   if (!cliente) {
     return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
   }
 
-  // Fetch REGISTRADO comprobantes for this client in the period
-  // Period matching: fechaEmision within the month
-  const periodoStart = new Date(`${yyyy}-${mm}-01`);
-  const nextMonth = new Date(periodoStart);
-  nextMonth.setMonth(nextMonth.getMonth() + 1);
+  // Fetch REGISTRADO comprobantes (incluyendo e-Kuatia — el Libro IRP los consolida)
+  const periodoStart = new Date(Date.UTC(anio, 0, 1));
+  const periodoEnd = new Date(Date.UTC(anio + 1, 0, 1));
 
   const comprobantes = await prisma.comprobante.findMany({
     where: {
-      organizacionId: session.user.organizacionId,
+      organizacionId,
       clienteId,
       estado: "REGISTRADO",
-      // D-014: excluir e-Kuatia del ZIP Marangatu (la SET prohíbe incluirlos)
-      NOT: { origen: "E_KUATIA_XML" },
-      fechaEmision: {
-        gte: periodoStart,
-        lt: nextMonth,
-      },
+      imputaIrpRsp: "S", // solo los que imputan IRP-RSP
+      fechaEmision: { gte: periodoStart, lt: periodoEnd },
     },
     select: {
       id: true,
@@ -87,17 +76,16 @@ export async function POST(req: NextRequest) {
       comprobanteAsociadoNumero: true,
       comprobanteAsociadoTimbrado: true,
     },
-    orderBy: { fechaEmision: "asc" },
+    orderBy: [{ tipoRegistro: "asc" }, { fechaEmision: "asc" }],
   });
 
   if (comprobantes.length === 0) {
     return NextResponse.json(
-      { error: "No hay comprobantes REGISTRADO para el período seleccionado" },
+      { error: "No hay comprobantes con imputación IRP-RSP para el año seleccionado" },
       { status: 422 },
     );
   }
 
-  // Build ZIP
   const exportables: ComprobanteExportar[] = comprobantes.map((c) => ({
     ...c,
     montoGravado10: Number(c.montoGravado10),
@@ -106,24 +94,32 @@ export async function POST(req: NextRequest) {
     total: Number(c.total),
   }));
 
-  const mmaa = `${mm}${yyyy}`;
-  const zipFilename = `${cliente.ruc}_${mmaa}_COMPROBANTES.zip`;
-  const zipBuffer = await buildZipMara(exportables, cliente.ruc, periodo);
+  // Build Excel
+  const excelBuffer = await buildLibroIrpExcel(
+    exportables,
+    { razonSocial: cliente.razonSocial, ruc: cliente.ruc, dv: cliente.dv },
+    anio,
+  );
 
   // Compute hash
-  const hashSha256 = crypto.createHash("sha256").update(zipBuffer).digest("hex");
+  const hashSha256 = crypto.createHash("sha256").update(excelBuffer).digest("hex");
 
   // Save to R2
-  const rutaArchivo = `exportaciones/${session.user.organizacionId}/${clienteId}/${periodoStr}/${zipFilename}`;
-  await putObject(rutaArchivo, zipBuffer, "application/zip");
+  const filename = `LIBRO_IRP_${cliente.ruc}_${anio}.xlsx`;
+  const rutaArchivo = `exportaciones/${organizacionId}/${clienteId}/${anio}/${filename}`;
+  await putObject(
+    rutaArchivo,
+    excelBuffer,
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  );
 
   // Create Exportacion record
   const exportacion = await prisma.exportacion.create({
     data: {
-      organizacionId: session.user.organizacionId,
+      organizacionId,
       clienteId,
-      tipo: "MARANGATU_ZIP",
-      periodo: periodoStr,
+      tipo: "LIBRO_IRP",
+      periodo: String(anio),
       rutaArchivo,
       hashArchivo: hashSha256,
       registrosIncluidos: comprobantes.length,
@@ -132,7 +128,7 @@ export async function POST(req: NextRequest) {
     select: { id: true },
   });
 
-  // Generate presigned URL (60 min)
+  // Presigned download URL (60 min)
   const url = await presignedGetUrl(rutaArchivo, 3600);
 
   return NextResponse.json({
@@ -140,6 +136,6 @@ export async function POST(req: NextRequest) {
     exportacionId: exportacion.id,
     url,
     registros: comprobantes.length,
-    filename: zipFilename,
+    filename,
   });
 }

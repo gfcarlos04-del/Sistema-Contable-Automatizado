@@ -141,6 +141,22 @@ export function buildLineasExportacion(comprobantes: ComprobanteExportar[]): {
   return { ventas, compras, ingresos, egresos };
 }
 
+/** Máximo de filas por archivo según Especificación Técnica SET. */
+const MAX_FILAS_POR_ARCHIVO = 5000;
+
+/**
+ * Divide un array de líneas en bloques de máximo MAX_FILAS_POR_ARCHIVO.
+ * Si hay un solo bloque devuelve [lineas]; si hay más, devuelve [bloque1, bloque2, …].
+ */
+function chunkLineas(lineas: string[]): string[][] {
+  if (lineas.length <= MAX_FILAS_POR_ARCHIVO) return [lineas];
+  const chunks: string[][] = [];
+  for (let i = 0; i < lineas.length; i += MAX_FILAS_POR_ARCHIVO) {
+    chunks.push(lineas.slice(i, i + MAX_FILAS_POR_ARCHIVO));
+  }
+  return chunks;
+}
+
 export async function buildZipMara(
   comprobantes: ComprobanteExportar[],
   clienteRuc: string,
@@ -153,18 +169,23 @@ export async function buildZipMara(
 
   const zip = new JSZip();
 
-  const grupos: { tipo: number; label: string; lineas: string[] }[] = [
-    { tipo: 1, label: "VENTAS", lineas: ventas },
-    { tipo: 2, label: "COMPRAS", lineas: compras },
-    { tipo: 3, label: "INGRESOS", lineas: ingresos },
-    { tipo: 4, label: "EGRESOS", lineas: egresos },
+  const grupos: { tipo: number; lineas: string[] }[] = [
+    { tipo: 1, lineas: ventas },
+    { tipo: 2, lineas: compras },
+    { tipo: 3, lineas: ingresos },
+    { tipo: 4, lineas: egresos },
   ];
 
   for (const grupo of grupos) {
     if (grupo.lineas.length === 0) continue;
-    const filename = `${grupo.tipo}_${clienteRuc}_${mmaa}.txt`;
-    const content = grupo.lineas.join("\r\n") + "\r\n";
-    zip.file(filename, content);
+    const chunks = chunkLineas(grupo.lineas);
+    chunks.forEach((chunk, idx) => {
+      // Cuando hay un solo chunk omitir el sufijo numérico para compatibilidad.
+      const suffix = chunks.length === 1 ? "" : `_${String(idx + 1).padStart(2, "0")}`;
+      const filename = `${grupo.tipo}_${clienteRuc}_${mmaa}${suffix}.txt`;
+      const content = chunk.join("\r\n") + "\r\n";
+      zip.file(filename, content);
+    });
   }
 
   const buffer = await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" });
