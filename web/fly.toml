@@ -13,6 +13,7 @@ primary_region = 'gru'
   GEMINI_MODEL = 'gemini-2.5-pro'
   NODE_ENV = 'production'
   PORT = '3000'
+  NODE_OPTIONS = '--max-old-space-size=450'
 
 [processes]
   web = 'node server.js'
@@ -35,10 +36,10 @@ primary_region = 'gru'
 
 [[vm]]
   size = 'shared-cpu-1x'
-  memory = '256mb'
+  memory = '512mb'
   processes = ['web']
 
 [[vm]]
   size = 'shared-cpu-1x'
-  memory = '256mb'
+  memory = '512mb'
   processes = ['worker']
