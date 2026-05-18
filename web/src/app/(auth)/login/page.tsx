@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { LoginForm } from "./LoginForm";
 
-export const metadata = { title: "Iniciar sesión — Marangatu" };
+export const metadata = { title: "Iniciar sesión" };
 
 export default function LoginPage() {
   return (

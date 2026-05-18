@@ -1,4 +1,4 @@
-export const metadata = { title: "Auditoría — Marangatu" };
+export const metadata = { title: "Auditoría" };
 
 export default function AuditoriaPage() {
   return (

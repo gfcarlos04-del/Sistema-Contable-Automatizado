@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
-export const metadata = { title: "Inicio — Marangatu" };
+export const metadata = { title: "Inicio" };
 
 export default async function AppHome() {
   const session = (await auth())!;
@@ -26,15 +26,15 @@ export default async function AppHome() {
       </div>
 
       <section className="mt-10 rounded-lg border border-gray-200 bg-gray-50 p-5">
-        <h2 className="text-sm font-semibold">Estado del proyecto — Fase 0</h2>
+        <h2 className="text-sm font-semibold">Estado del proyecto — Fase 1</h2>
         <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-gray-700">
-          <li>Base de datos en Supabase + schema multi-tenant migrado.</li>
+          <li>Base de datos en Neon + schema multi-tenant migrado.</li>
           <li>Catálogos Tablas 1-5 SET (junio/2021) sembrados.</li>
           <li>Auth con NextAuth + roles Admin/Operador.</li>
-          <li>Onboarding (crear cuenta = crear organización + admin).</li>
+          <li>ABM de clientes con validación RUC + DV y selector persistente.</li>
         </ul>
         <p className="mt-3 text-xs text-gray-500">
-          Próximo: Fase 1 — CRUD de clientes y carga de comprobantes.
+          Próximo: upload de comprobantes con Cloudflare R2 + visor PDF/imagen.
         </p>
       </section>
     </div>

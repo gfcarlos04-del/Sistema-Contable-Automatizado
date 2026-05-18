@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 import { crearClienteAction } from "../actions";
 import { ClienteForm } from "../ClienteForm";
 
-export const metadata = { title: "Nuevo cliente — Marangatu" };
+export const metadata = { title: "Nuevo cliente" };
 
 export default async function NuevoClientePage() {
   const session = (await auth())!;

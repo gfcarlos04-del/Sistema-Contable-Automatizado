@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
-const COOKIE_NAME = "marangatu_cliente_activo";
+const COOKIE_NAME = "tavex_cliente_activo";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 días
 
 export interface ClienteActivo {

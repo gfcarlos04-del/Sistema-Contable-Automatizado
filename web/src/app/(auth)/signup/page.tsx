@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { SignupForm } from "./SignupForm";
 
-export const metadata = { title: "Crear cuenta — Marangatu" };
+export const metadata = { title: "Crear cuenta" };
 
 export default function SignupPage() {
   return (

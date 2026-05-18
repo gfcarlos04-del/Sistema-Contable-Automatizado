@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { ToggleActivoForm } from "./ToggleActivoForm";
 
-export const metadata = { title: "Clientes — Marangatu" };
+export const metadata = { title: "Clientes" };
 
 export default async function ClientesPage() {
   const session = (await auth())!;

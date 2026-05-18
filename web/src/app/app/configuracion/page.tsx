@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { existeApiKeyGemini } from "./actions";
 import { GeminiKeyForm } from "./GeminiKeyForm";
 
-export const metadata = { title: "Configuración — Marangatu" };
+export const metadata = { title: "Configuración" };
 
 export default async function ConfiguracionPage() {
   const session = (await auth())!;

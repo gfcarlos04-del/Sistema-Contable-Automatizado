@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { editarClienteAction, type FormState } from "../actions";
 import { ClienteForm } from "../ClienteForm";
 
-export const metadata = { title: "Cliente — Marangatu" };
+export const metadata = { title: "Cliente" };
 
 export default async function ClienteDetallePage(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params;

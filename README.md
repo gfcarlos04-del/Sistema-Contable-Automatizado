@@ -1,8 +1,12 @@
-# Registro de Comprobantes Marangatu
+# Tavex
 
-SaaS multi-tenant para asistir el registro contable de comprobantes en Paraguay,
-con extracción asistida por Gemini y exportación al formato exigido por el
-módulo de Importación de Comprobantes del Sistema Marangatu (SET/DNIT).
+**Tavex** es un SaaS multi-tenant para asistir el registro contable de comprobantes
+en Paraguay, con extracción asistida por Gemini y exportación al formato exigido
+por el módulo de **Importación de Comprobantes** del Sistema Marangatu (SET/DNIT).
+
+> Tavex no reemplaza a Marangatu ni al criterio profesional del contador.
+> Es una capa de pre-captura, validación, revisión humana y exportación,
+> separada por cliente y por organización.
 
 ## Estructura del repo
 
@@ -15,7 +19,7 @@ módulo de Importación de Comprobantes del Sistema Marangatu (SET/DNIT).
 
 ## Stack
 
-- **Frontend / API:** Next.js 15 (App Router) + TypeScript + TailwindCSS + shadcn/ui
+- **Frontend / API:** Next.js 16 (App Router) + TypeScript + TailwindCSS
 - **DB:** PostgreSQL en Neon (dev y prod)
 - **ORM:** Prisma
 - **Auth:** NextAuth (credenciales) con roles `admin` / `operador`
@@ -31,7 +35,7 @@ cd web
 npm install
 cp .env.example .env.local   # completar con credenciales
 npx prisma migrate dev
-npm run seed
+npm run db:seed
 npm run dev
 ```
 

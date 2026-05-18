@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Marangatu — Registro de Comprobantes",
+  title: { default: "Tavex", template: "%s · Tavex" },
   description:
-    "Sistema de pre-captura, validación y exportación de comprobantes para Marangatu (SET/DNIT).",
+    "Tavex — pre-captura, validación y exportación de comprobantes contables para el Sistema Marangatu (SET/DNIT).",
 };
 
 export default function RootLayout({

@@ -29,7 +29,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
           <div className="flex items-center gap-6">
             <Link href="/app" className="text-sm font-semibold tracking-tight">
-              Marangatu
+              Tavex
             </Link>
             <span className="text-xs text-gray-500">{organizacion?.nombre}</span>
           </div>

@@ -1,4 +1,4 @@
-export const metadata = { title: "Comprobantes — Marangatu" };
+export const metadata = { title: "Comprobantes" };
 
 export default function ComprobantesPage() {
   return (

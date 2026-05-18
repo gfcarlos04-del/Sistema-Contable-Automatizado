@@ -1,4 +1,4 @@
-export const metadata = { title: "Exportaciones — Marangatu" };
+export const metadata = { title: "Exportaciones" };
 
 export default function ExportacionesPage() {
   return (
