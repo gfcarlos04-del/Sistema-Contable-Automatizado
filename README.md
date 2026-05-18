@@ -22,7 +22,7 @@ módulo de Importación de Comprobantes del Sistema Marangatu (SET/DNIT).
 - **Cola:** BullMQ + Redis (Upstash)
 - **Archivos:** Cloudflare R2 (S3-compatible)
 - **IA:** Gemini 2.5 (server-side, API Key cifrada por organización)
-- **Hosting prod:** Vercel
+- **Hosting prod:** Fly.io (región `gru` — São Paulo). Web Next.js + worker BullMQ en la misma app.
 
 ## Quickstart (dev)
 
