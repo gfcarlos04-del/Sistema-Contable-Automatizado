@@ -1,46 +1,44 @@
-# Fly.io — Marangatu (web + worker en la misma imagen).
-# Región `gru` (São Paulo) por cercanía con Paraguay.
-# Reemplazá `app = "..."` con el nombre real cuando hagas `fly launch`.
+# fly.toml app configuration file generated for marangatu-web on 2026-05-17T22:40:42-03:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
-app = "marangatu-web"
-primary_region = "gru"
+app = 'marangatu-web'
+primary_region = 'gru'
 
 [build]
-  dockerfile = "Dockerfile"
+  dockerfile = 'Dockerfile'
 
 [env]
-  NODE_ENV = "production"
-  PORT = "3000"
-  GEMINI_MODEL = "gemini-2.5-pro"
+  GEMINI_MODEL = 'gemini-2.5-pro'
+  NODE_ENV = 'production'
+  PORT = '3000'
 
-# Dos procesos sobre la misma imagen.
 [processes]
-  web = "node server.js"
-  worker = "node_modules/.bin/tsx src/worker/index.ts"
+  web = 'node server.js'
+  worker = 'node_modules/.bin/tsx src/worker/index.ts'
 
 [http_service]
   internal_port = 3000
   force_https = true
-  auto_stop_machines = "stop"
+  auto_stop_machines = 'stop'
   auto_start_machines = true
-  min_machines_running = 0   # se duerme si no hay tráfico (free tier friendly)
-  processes = ["web"]
+  min_machines_running = 0
+  processes = ['web']
 
   [[http_service.checks]]
-    grace_period = "10s"
-    interval = "30s"
-    method = "GET"
-    timeout = "5s"
-    path = "/"
-
-# Sólo el proceso web tiene VM corriendo por defecto; el worker se enciende
-# al primer push de F2 (cuando arranque la cola Gemini real).
-[[vm]]
-  size = "shared-cpu-1x"
-  memory = "256mb"
-  processes = ["web"]
+    interval = '30s'
+    timeout = '5s'
+    grace_period = '10s'
+    method = 'GET'
+    path = '/'
 
 [[vm]]
-  size = "shared-cpu-1x"
-  memory = "256mb"
-  processes = ["worker"]
+  size = 'shared-cpu-1x'
+  memory = '256mb'
+  processes = ['web']
+
+[[vm]]
+  size = 'shared-cpu-1x'
+  memory = '256mb'
+  processes = ['worker']
