@@ -31,7 +31,7 @@
 | D-012 | **Soportar los 3 regímenes** (IVA, IVA+IRE, IRP-RSP puro) desde V1 | Definido por el usuario el 2026-05-13. Requiere los 3 exportadores Excel. |
 | D-013 | **Volumen alto** asumido; cola robusta (BullMQ + Redis) en lugar de pg-boss | Definido por el usuario el 2026-05-13. |
 | D-014 | **Consolidar e-Kuatia (XML)** en libros contables internos, pero **NO** incluirlo en el archivo de importación a Marangatu | La SET prohíbe incluir e-Kuatia en el ZIP. Pero el usuario quiere verlos junto a los manuales en sus libros. Cumple ambas reglas. |
-| D-015 | **Hosting: Vercel + Supabase + Cloudflare R2 + Upstash Redis** (definido 2026-05-16). Postgres unificado en Supabase para dev y prod. | Stack serverless free-tier friendly. Evita Docker local. Una sola DB que administrar. |
+| D-015 | **Hosting: Vercel + Neon + Cloudflare R2 + Upstash Redis** (definido 2026-05-16, ajustado 2026-05-17 cambiando Supabase→Neon). Postgres unificado en Neon para dev y prod. | Stack serverless free-tier friendly. Evita Docker local. Una sola DB que administrar. Neon ofrece branching nativo de Postgres para dev/staging. |
 | D-016 | **bcryptjs** en vez de argon2 (definido 2026-05-16). | argon2 requiere bindings nativos problemáticos en Windows; bcryptjs es puro JS. Costo: bcrypt es ligeramente más débil que argon2id, pero suficiente con 12 rounds. Revisable si surge presión de seguridad. |
 
 ## 3. Reglas detectadas en el Excel modelo Marangatu (planilla de importación)

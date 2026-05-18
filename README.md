@@ -16,7 +16,7 @@ módulo de Importación de Comprobantes del Sistema Marangatu (SET/DNIT).
 ## Stack
 
 - **Frontend / API:** Next.js 15 (App Router) + TypeScript + TailwindCSS + shadcn/ui
-- **DB:** PostgreSQL en Supabase (dev y prod)
+- **DB:** PostgreSQL en Neon (dev y prod)
 - **ORM:** Prisma
 - **Auth:** NextAuth (credenciales) con roles `admin` / `operador`
 - **Cola:** BullMQ + Redis (Upstash)
