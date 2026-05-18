@@ -32,9 +32,10 @@ yarn-error.log*
 pnpm-debug.log*
 *.log
 
-# IDE
+# IDE / herramientas de asistencia
 .vscode/
 .idea/
+.claude/
 *.swp
 *.swo
 .DS_Store
