@@ -2,22 +2,26 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { getClienteActivo } from "@/lib/cliente-activo";
 import { signOutAction } from "./actions";
+import { SelectorCliente } from "./SelectorCliente";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
-  const organizacion = await prisma.organizacion.findUnique({
-    where: { id: session.user.organizacionId },
-    select: { nombre: true, slug: true },
-  });
-
-  const clientes = await prisma.cliente.findMany({
-    where: { organizacionId: session.user.organizacionId, activo: true },
-    select: { id: true, razonSocial: true, ruc: true, dv: true },
-    orderBy: { razonSocial: "asc" },
-  });
+  const [organizacion, clientes, clienteActivo] = await Promise.all([
+    prisma.organizacion.findUnique({
+      where: { id: session.user.organizacionId },
+      select: { nombre: true, slug: true },
+    }),
+    prisma.cliente.findMany({
+      where: { organizacionId: session.user.organizacionId, activo: true },
+      select: { id: true, razonSocial: true, ruc: true, dv: true },
+      orderBy: { razonSocial: "asc" },
+    }),
+    getClienteActivo(),
+  ]);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -31,24 +35,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Selector de cliente (placeholder funcional; en F1 será controlado y persistente). */}
-            <label className="flex items-center gap-2 text-xs text-gray-600">
-              Cliente activo:
-              <select
-                className="rounded-md border border-gray-300 px-2 py-1 text-xs"
-                defaultValue=""
-                disabled={clientes.length === 0}
-              >
-                <option value="" disabled>
-                  {clientes.length === 0 ? "Sin clientes — creá uno en F1" : "Seleccionar…"}
-                </option>
-                {clientes.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.razonSocial} ({c.ruc}-{c.dv})
-                  </option>
-                ))}
-              </select>
-            </label>
+            <SelectorCliente clientes={clientes} clienteActivoId={clienteActivo?.id ?? null} />
 
             <span className="text-xs text-gray-500">
               {session.user.name} · {session.user.rol === "ADMIN" ? "Admin" : "Operador"}
@@ -75,9 +62,17 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <NavLink href="/app/auditoria">Auditoría</NavLink>
             <NavLink href="/app/configuracion">Configuración</NavLink>
           </nav>
-          <p className="mt-6 text-xs text-gray-500">
-            Las secciones se irán habilitando en cada fase del plan.
-          </p>
+          {clienteActivo && (
+            <p className="mt-6 rounded-md bg-gray-50 px-3 py-2 text-xs text-gray-600">
+              Trabajando con:
+              <br />
+              <strong>{clienteActivo.razonSocial}</strong>
+              <br />
+              <span className="font-mono">
+                {clienteActivo.ruc}-{clienteActivo.dv}
+              </span>
+            </p>
+          )}
         </aside>
 
         <main className="flex-1">{children}</main>
