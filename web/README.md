@@ -25,5 +25,4 @@ Documentación completa en [`../README.md`](../README.md) y `../docs/`.
 ## Deploy
 
 CI (GitHub Actions) corre lint + typecheck + tests en todo push, y en `main`
-ejecuta `flyctl deploy`. App en https://marangatu-web.fly.dev (la URL queda
-con el slug original; se puede migrar a `tavex.fly.dev` con `fly apps move`).
+ejecuta `flyctl deploy`. App en **https://tavex.fly.dev**.
