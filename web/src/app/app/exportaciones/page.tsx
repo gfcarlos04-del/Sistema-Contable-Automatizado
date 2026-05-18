@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getClienteActivo } from "@/lib/cliente-activo";
 import { presignedGetUrl } from "@/lib/storage";
 import { GenerarExportacion } from "./GenerarExportacion";
+import { GenerarLibroIva } from "./GenerarLibroIva";
 
 export const metadata = { title: "Exportaciones" };
 
@@ -79,6 +80,11 @@ export default async function ExportacionesPage() {
       </div>
 
       <GenerarExportacion
+        clienteId={clienteActivo.id}
+        clienteNombre={`${clienteActivo.razonSocial} (${clienteActivo.ruc}-${clienteActivo.dv})`}
+      />
+
+      <GenerarLibroIva
         clienteId={clienteActivo.id}
         clienteNombre={`${clienteActivo.razonSocial} (${clienteActivo.ruc}-${clienteActivo.dv})`}
       />
