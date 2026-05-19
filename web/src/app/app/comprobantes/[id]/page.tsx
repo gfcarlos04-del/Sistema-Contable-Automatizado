@@ -6,6 +6,7 @@ import { VisorArchivo } from "../VisorArchivo";
 import { FormRevision } from "./FormRevision";
 import { ProcesandoPoller } from "./ProcesandoPoller";
 import { EliminarComprobanteButton } from "./EliminarComprobanteButton";
+import { ReactivarComprobanteButton } from "./ReactivarComprobanteButton";
 
 export const metadata = { title: "Comprobante" };
 
@@ -190,8 +191,11 @@ export default async function ComprobanteDetallePage(props: { params: Promise<{ 
 
       {/* RECHAZADO banner */}
       {estado === "RECHAZADO" && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          <strong>Rechazado.</strong> Este comprobante fue descartado.
+        <div className="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+          <p className="text-sm text-red-700">
+            <strong>Rechazado.</strong> Este comprobante fue descartado.
+          </p>
+          <ReactivarComprobanteButton comprobanteId={comprobante.id} />
         </div>
       )}
 

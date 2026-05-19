@@ -73,6 +73,8 @@ export default async function ComprobantesPage(props: {
   const q = params.q?.trim() ?? "";
   const desde = params.desde ?? "";
   const hasta = params.hasta ?? "";
+  const PAGE_SIZE = 50;
+  const page = Math.max(1, parseInt(params.page ?? "1", 10));
 
   // Build where clause
   const andClauses: Prisma.ComprobanteWhereInput[] = [];
@@ -105,11 +107,13 @@ export default async function ComprobantesPage(props: {
     ...(andClauses.length > 0 ? { AND: andClauses } : {}),
   };
 
-  const comprobantes = await prisma.comprobante.findMany({
-    where,
-    orderBy: { creadoEn: "desc" },
-    take: 100,
-    select: {
+  const [comprobantes, total] = await Promise.all([
+    prisma.comprobante.findMany({
+      where,
+      orderBy: { creadoEn: "desc" },
+      take: PAGE_SIZE,
+      skip: (page - 1) * PAGE_SIZE,
+      select: {
       id: true,
       estado: true,
       tipoComprobante: true,
@@ -120,9 +124,24 @@ export default async function ComprobantesPage(props: {
       creadoEn: true,
       nombreContraparte: true,
     },
-  });
+  }),
+  prisma.comprobante.count({ where }),
+]);
 
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const hayFiltros = !!estadoParam || !!q || !!desde || !!hasta;
+
+  // Build query string helper for pagination links
+  function pageUrl(p: number) {
+    const qp = new URLSearchParams();
+    if (estadoParam) qp.set("estado", estadoParam);
+    if (q) qp.set("q", q);
+    if (desde) qp.set("desde", desde);
+    if (hasta) qp.set("hasta", hasta);
+    if (p > 1) qp.set("page", String(p));
+    const qs = qp.toString();
+    return `/app/comprobantes${qs ? `?${qs}` : ""}`;
+  }
 
   return (
     <div>
@@ -249,9 +268,14 @@ export default async function ComprobantesPage(props: {
 
       {/* Contador */}
       <p className="mt-3 text-sm text-gray-500">
-        Mostrando <strong>{comprobantes.length}</strong>{" "}
-        {comprobantes.length === 1 ? "comprobante" : "comprobantes"}
+        <strong>{total.toLocaleString("es-PY")}</strong>{" "}
+        {total === 1 ? "comprobante" : "comprobantes"}
         {hayFiltros ? " (con filtros activos)" : ""}
+        {totalPages > 1 && (
+          <span className="ml-1">
+            — página <strong>{page}</strong> de <strong>{totalPages}</strong>
+          </span>
+        )}
       </p>
 
       {/* Lista */}
@@ -352,10 +376,30 @@ export default async function ComprobantesPage(props: {
             </tbody>
           </table>
 
-          {comprobantes.length === 100 && (
-            <p className="border-t border-gray-100 px-4 py-2 text-center text-xs text-gray-500">
-              Mostrando los primeros 100 resultados. Usá los filtros para acotar la búsqueda.
-            </p>
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3">
+              <span className="text-xs text-gray-500">
+                Página {page} de {totalPages}
+              </span>
+              <div className="flex gap-2">
+                {page > 1 && (
+                  <Link
+                    href={pageUrl(page - 1)}
+                    className="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    ← Anterior
+                  </Link>
+                )}
+                {page < totalPages && (
+                  <Link
+                    href={pageUrl(page + 1)}
+                    className="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    Siguiente →
+                  </Link>
+                )}
+              </div>
+            </div>
           )}
         </div>
       )}

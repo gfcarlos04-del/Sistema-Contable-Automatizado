@@ -363,3 +363,50 @@ export async function eliminarComprobante(comprobanteId: string): Promise<Action
 
   redirect("/app/comprobantes");
 }
+
+// ── reactivarComprobante ──────────────────────────────────────────────────
+
+export async function reactivarComprobante(comprobanteId: string): Promise<ActionResult> {
+  const session = await requireSession();
+
+  const comprobante = await prisma.comprobante.findFirst({
+    where: { id: comprobanteId, organizacionId: session.user.organizacionId },
+    select: { id: true, estado: true },
+  });
+  if (!comprobante)
+    return { ok: false, errors: [{ codigo: "AUTH", mensaje: "No encontrado", severidad: "BLOQ" }] };
+
+  if (comprobante.estado !== "RECHAZADO") {
+    return {
+      ok: false,
+      errors: [
+        {
+          codigo: "ESTADO",
+          mensaje: "Solo se pueden reactivar comprobantes en estado Rechazado.",
+          severidad: "BLOQ",
+        },
+      ],
+    };
+  }
+
+  await prisma.$transaction([
+    prisma.comprobante.update({
+      where: { id: comprobanteId },
+      data: { estado: "EN_REVISION" },
+    }),
+    prisma.auditoriaCambio.create({
+      data: {
+        organizacionId: session.user.organizacionId,
+        entidad: "comprobante",
+        idEntidad: comprobanteId,
+        campo: "estado",
+        valorAnterior: "RECHAZADO",
+        valorNuevo: "EN_REVISION",
+        usuarioId: session.user.id,
+        motivo: "Reactivado para corrección",
+      },
+    }),
+  ]);
+
+  return { ok: true };
+}
