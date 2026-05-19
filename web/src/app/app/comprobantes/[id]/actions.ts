@@ -141,6 +141,35 @@ export async function aprobarComprobante(comprobanteId: string): Promise<ActionR
   if (!comprobante)
     return { ok: false, errors: [{ codigo: "AUTH", mensaje: "No encontrado", severidad: "BLOQ" }] };
 
+  // D-002: Duplicate detection — same timbrado + numero + rucContraparte + tipoRegistro
+  // within the same organization, already REGISTRADO
+  if (comprobante.timbrado && comprobante.numero && comprobante.rucContraparte) {
+    const duplicado = await prisma.comprobante.findFirst({
+      where: {
+        id: { not: comprobanteId },
+        organizacionId: session.user.organizacionId,
+        timbrado: comprobante.timbrado,
+        numero: comprobante.numero,
+        rucContraparte: comprobante.rucContraparte,
+        tipoRegistro: comprobante.tipoRegistro,
+        estado: "REGISTRADO",
+      },
+      select: { id: true },
+    });
+    if (duplicado) {
+      return {
+        ok: false,
+        errors: [
+          {
+            codigo: "D-002",
+            mensaje: `Ya existe un comprobante registrado con el mismo timbrado (${comprobante.timbrado}), número (${comprobante.numero}) y RUC contraparte (${comprobante.rucContraparte}).`,
+            severidad: "BLOQ",
+          },
+        ],
+      };
+    }
+  }
+
   // Run validations as if estado = REGISTRADO
   const errors = validarComprobante({
     tipoRegistro: comprobante.tipoRegistro,
@@ -162,6 +191,10 @@ export async function aprobarComprobante(comprobanteId: string): Promise<ActionR
     noImputa: comprobante.noImputa,
     estado: "REGISTRADO",
     campos: comprobante.campos,
+    comprobanteAsociadoNumero: comprobante.comprobanteAsociadoNumero,
+    comprobanteAsociadoTimbrado: comprobante.comprobanteAsociadoTimbrado,
+    nombreContraparte: comprobante.nombreContraparte,
+    tipoIdentificacionContraparte: comprobante.tipoIdentificacionContraparte,
   });
 
   const bloqueantes = errors.filter((e) => e.severidad === "BLOQ");
@@ -293,4 +326,40 @@ export async function reextraerComprobante(comprobanteId: string): Promise<Actio
   }
 
   return { ok: true, usoCola };
+}
+
+// ── eliminarComprobante ───────────────────────────────────────────────────
+
+export async function eliminarComprobante(comprobanteId: string): Promise<ActionResult> {
+  const session = await requireSession();
+
+  const comprobante = await prisma.comprobante.findFirst({
+    where: { id: comprobanteId, organizacionId: session.user.organizacionId },
+    select: { id: true, estado: true, archivoId: true },
+  });
+  if (!comprobante)
+    return { ok: false, errors: [{ codigo: "AUTH", mensaje: "No encontrado", severidad: "BLOQ" }] };
+
+  // Only allow deleting non-finalized comprobantes
+  if (comprobante.estado === "REGISTRADO") {
+    return {
+      ok: false,
+      errors: [
+        {
+          codigo: "DEL_BLOQ",
+          mensaje: "No se puede eliminar un comprobante ya registrado.",
+          severidad: "BLOQ",
+        },
+      ],
+    };
+  }
+
+  // Delete campos and the comprobante (archivo stays in R2 — not deleted to preserve audit trail)
+  await prisma.$transaction([
+    prisma.campoExtraido.deleteMany({ where: { comprobanteId } }),
+    prisma.auditoriaCambio.deleteMany({ where: { idEntidad: comprobanteId, entidad: "comprobante" } }),
+    prisma.comprobante.delete({ where: { id: comprobanteId } }),
+  ]);
+
+  redirect("/app/comprobantes");
 }

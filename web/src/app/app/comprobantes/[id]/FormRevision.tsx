@@ -160,10 +160,13 @@ export function FormRevision({
     const total = parseInt(fd.get("total") as string, 10) || 0;
     const fechaEmision = (fd.get("fechaEmision") as string) ?? "";
     const tipoComprobante = parseInt(fd.get("tipoComprobante") as string, 10);
+    const rucContraparte = (fd.get("rucContraparte") as string) ?? "";
 
     if (total <= 0) return "El total debe ser mayor a 0.";
     if (!fechaEmision) return "La fecha de emisión es obligatoria.";
     if (tipoComprobante === 0) return "Seleccioná el tipo de comprobante.";
+    if (rucContraparte && !/^\d{1,8}$/.test(rucContraparte))
+      return "El RUC de la contraparte debe tener entre 1 y 8 dígitos numéricos (sin DV).";
     const imputaIva = fd.get("imputaIva") === "S";
     const imputaIre = fd.get("imputaIre") === "S";
     const imputaIrpRsp = fd.get("imputaIrpRsp") === "S";
@@ -188,20 +191,35 @@ export function FormRevision({
     null,
   );
 
-  const errors = approveResult?.errors ?? saveResult?.errors ?? [];
-  const allErrors = clientError
-    ? [{ codigo: "CLIENT", mensaje: clientError, nivel: "BLOQ" as const }, ...errors]
-    : errors;
+  const serverErrors = approveResult?.errors ?? saveResult?.errors ?? [];
+  const allErrors: ErrorValidacion[] = clientError
+    ? [{ codigo: "CLIENT", mensaje: clientError, severidad: "BLOQ" as const }, ...serverErrors]
+    : serverErrors;
+  const bloqueantes = allErrors.filter((e) => e.severidad === "BLOQ");
+  const advertencias = allErrors.filter((e) => e.severidad === "ADV");
 
   return (
     <div className="space-y-6">
-      {/* Error list */}
-      {allErrors.length > 0 && (
+      {/* Blocking errors */}
+      {bloqueantes.length > 0 && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4">
           <p className="mb-2 text-sm font-medium text-red-800">Errores de validación:</p>
           <ul className="list-inside list-disc space-y-1">
-            {allErrors.map((e) => (
+            {bloqueantes.map((e) => (
               <li key={e.codigo} className="text-sm text-red-700">
+                <strong>[{e.codigo}]</strong> {e.mensaje}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {/* Advisory warnings */}
+      {advertencias.length > 0 && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+          <p className="mb-2 text-sm font-medium text-amber-800">Advertencias (no bloquean):</p>
+          <ul className="list-inside list-disc space-y-1">
+            {advertencias.map((e) => (
+              <li key={e.codigo} className="text-sm text-amber-700">
                 <strong>[{e.codigo}]</strong> {e.mensaje}
               </li>
             ))}

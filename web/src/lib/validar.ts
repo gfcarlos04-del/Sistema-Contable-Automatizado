@@ -35,6 +35,11 @@ export interface ComprobanteParaValidar {
   noImputa: string;
   estado?: string;
   campos: CampoValidar[];
+  // Optional fields for extended validations
+  comprobanteAsociadoNumero?: string | null;
+  comprobanteAsociadoTimbrado?: string | null;
+  nombreContraparte?: string | null;
+  tipoIdentificacionContraparte?: number | null;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -174,6 +179,104 @@ export function validarComprobante(c: ComprobanteParaValidar): ErrorValidacion[]
         codigo: "V-014",
         mensaje: "Debe seleccionar al menos una imputación (IVA, IRE, IRP-RSP o No Imputa).",
         severidad: "BLOQ",
+      });
+    }
+  }
+
+  // V-002: RUC format — solo dígitos, longitud 1–8 — BLOQ
+  if (c.rucContraparte != null && c.rucContraparte !== "") {
+    if (!/^\d{1,8}$/.test(c.rucContraparte)) {
+      errors.push({
+        codigo: "V-002",
+        mensaje: `El RUC de la contraparte debe contener entre 1 y 8 dígitos numéricos (sin DV).`,
+        severidad: "BLOQ",
+        campo: "rucContraparte",
+      });
+    }
+  }
+
+  // V-012: Nombre obligatorio salvo que tipoIdentificacion ∈ {11,12,15} para ventas
+  //        o ∈ {11,12} para compras/ingresos/egresos
+  const tipoId = c.tipoIdentificacionContraparte ?? 0;
+  const nombreOpcionalVentas = [11, 12, 15].includes(tipoId);
+  const nombreOpcionalCompras = [11, 12].includes(tipoId);
+  const nombreEsOpcional =
+    (registro === 1 && nombreOpcionalVentas) ||
+    ([2, 3, 4].includes(registro) && nombreOpcionalCompras);
+  if (!nombreEsOpcional && !c.nombreContraparte) {
+    errors.push({
+      codigo: "V-012",
+      mensaje: "El nombre/razón social de la contraparte es obligatorio para este tipo de identificación.",
+      severidad: "BLOQ",
+      campo: "nombreContraparte",
+    });
+  }
+
+  // V-017: Comprobante asociado número y timbrado requeridos para NC/ND — BLOQ
+  const tiposConAsociado = [110, 111, 201, 203]; // NC venta, ND venta, NC compra, ND compra
+  if (tiposConAsociado.includes(tipo)) {
+    if (!c.comprobanteAsociadoNumero) {
+      errors.push({
+        codigo: "V-017",
+        mensaje: "El número del comprobante asociado es obligatorio para notas de crédito/débito.",
+        severidad: "BLOQ",
+        campo: "comprobanteAsociadoNumero",
+      });
+    }
+    if (!c.comprobanteAsociadoTimbrado) {
+      errors.push({
+        codigo: "V-017",
+        mensaje: "El timbrado del comprobante asociado es obligatorio para notas de crédito/débito.",
+        severidad: "BLOQ",
+        campo: "comprobanteAsociadoTimbrado",
+      });
+    }
+  }
+
+  // C-001: IVA 10 coherencia — ADV
+  const iva10 = toNumber(c.iva10);
+  if (gravado10 > 0 && iva10 > 0) {
+    const iva10Esperado = Math.round(gravado10 / 11);
+    if (Math.abs(iva10 - iva10Esperado) > 1) {
+      errors.push({
+        codigo: "C-001",
+        mensaje: `IVA 10% informado (${iva10.toLocaleString("es-PY")}) difiere del calculado (${iva10Esperado.toLocaleString("es-PY")} = gravado÷11). Verificar.`,
+        severidad: "ADV",
+        campo: "iva10",
+      });
+    }
+  }
+
+  // C-002: IVA 5 coherencia — ADV
+  const iva5 = toNumber(c.iva5);
+  if (gravado5 > 0 && iva5 > 0) {
+    const iva5Esperado = Math.round(gravado5 / 21);
+    if (Math.abs(iva5 - iva5Esperado) > 1) {
+      errors.push({
+        codigo: "C-002",
+        mensaje: `IVA 5% informado (${iva5.toLocaleString("es-PY")}) difiere del calculado (${iva5Esperado.toLocaleString("es-PY")} = gravado÷21). Verificar.`,
+        severidad: "ADV",
+        campo: "iva5",
+      });
+    }
+  }
+
+  // C-004: Montos deben ser enteros (PYG no tiene decimales) — BLOQ
+  const montosCheck = [
+    { campo: "montoGravado10", valor: gravado10 },
+    { campo: "montoGravado5", valor: gravado5 },
+    { campo: "exento", valor: exento },
+    { campo: "total", valor: total },
+    { campo: "iva10", valor: iva10 },
+    { campo: "iva5", valor: iva5 },
+  ];
+  for (const { campo, valor } of montosCheck) {
+    if (!Number.isInteger(valor)) {
+      errors.push({
+        codigo: "C-004",
+        mensaje: `El campo "${campo}" debe ser un monto entero (el guaraní no tiene decimales).`,
+        severidad: "BLOQ",
+        campo,
       });
     }
   }

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { VisorArchivo } from "../VisorArchivo";
 import { FormRevision } from "./FormRevision";
 import { ProcesandoPoller } from "./ProcesandoPoller";
+import { EliminarComprobanteButton } from "./EliminarComprobanteButton";
 
 export const metadata = { title: "Comprobante" };
 
@@ -157,11 +158,16 @@ export default async function ComprobanteDetallePage(props: { params: Promise<{ 
           </p>
         </div>
 
-        {/* Info metadata */}
-        <div className="hidden text-right text-xs text-gray-400 lg:block">
-          {comprobante.geminiModelo && <p>Modelo: {comprobante.geminiModelo}</p>}
-          {comprobante.confianzaGeneral != null && (
-            <p>Confianza: {comprobante.confianzaGeneral}%</p>
+        {/* Info metadata + Delete */}
+        <div className="flex flex-col items-end gap-2">
+          <div className="hidden text-right text-xs text-gray-400 lg:block">
+            {comprobante.geminiModelo && <p>Modelo: {comprobante.geminiModelo}</p>}
+            {comprobante.confianzaGeneral != null && (
+              <p>Confianza: {comprobante.confianzaGeneral}%</p>
+            )}
+          </div>
+          {estado !== "REGISTRADO" && (
+            <EliminarComprobanteButton comprobanteId={comprobante.id} />
           )}
         </div>
       </div>
