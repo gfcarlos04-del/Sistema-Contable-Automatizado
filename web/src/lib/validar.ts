@@ -212,6 +212,29 @@ export function validarComprobante(c: ComprobanteParaValidar): ErrorValidacion[]
     });
   }
 
+  // V-015: Si noImputa = "S", debe haber al menos otra imputación en "S" — BLOQ (COMPRAS y EGRESOS)
+  if ((registro === 2 || registro === 4) && c.noImputa === "S") {
+    const tieneOtra = c.imputaIva === "S" || c.imputaIre === "S" || c.imputaIrpRsp === "S";
+    if (!tieneOtra) {
+      errors.push({
+        codigo: "V-015",
+        mensaje: "Si se marca 'No imputa', debe seleccionarse al menos otra imputación (IVA, IRE o IRP-RSP).",
+        severidad: "BLOQ",
+      });
+    }
+  }
+
+  // V-019: Para tipos 101/104/105/112 en COMPRAS — gravados y exento deben ser 0 — BLOQ
+  if (registro === 2 && [101, 104, 105, 112].includes(tipo)) {
+    if (gravado10 !== 0 || gravado5 !== 0 || exento !== 0) {
+      errors.push({
+        codigo: "V-019",
+        mensaje: "Para este tipo de comprobante en Compras, los montos gravados y exento deben ser 0 (solo el total es informativo).",
+        severidad: "BLOQ",
+      });
+    }
+  }
+
   // V-017: Comprobante asociado número y timbrado requeridos para NC/ND — BLOQ
   const tiposConAsociado = [110, 111, 201, 203]; // NC venta, ND venta, NC compra, ND compra
   if (tiposConAsociado.includes(tipo)) {

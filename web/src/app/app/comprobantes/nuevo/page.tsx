@@ -26,12 +26,12 @@ export default async function NuevoComprobantePage() {
   }
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-2xl space-y-6">
       {/* Encabezado */}
-      <div className="mb-6 flex items-center gap-3">
+      <div className="flex items-center gap-3">
         <Link
           href="/app/comprobantes"
-          className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+          className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
           aria-label="Volver"
         >
           <svg
@@ -49,7 +49,7 @@ export default async function NuevoComprobantePage() {
           </svg>
         </Link>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Cargar comprobante</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Cargar comprobante</h1>
           <p className="mt-0.5 text-sm text-gray-500">
             Cliente:{" "}
             <strong>
@@ -59,11 +59,18 @@ export default async function NuevoComprobantePage() {
         </div>
       </div>
 
-      {/* Zona de carga */}
-      <DropZone clienteId={clienteActivo.id} />
+      {/* Panel de carga */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+        <h2 className="text-base font-semibold text-gray-900 mb-1">Seleccioná los archivos</h2>
+        <p className="text-sm text-gray-500 mb-5">
+          PDF, imagen o XML. Podés arrastrar varios archivos a la vez.
+        </p>
+        {/* Zona de carga */}
+        <DropZone clienteId={clienteActivo.id} />
+      </div>
 
       {/* Info */}
-      <div className="mt-6 rounded-lg bg-blue-50 px-4 py-3 text-xs text-blue-700">
+      <div className="rounded-lg bg-blue-50 border border-blue-100 px-4 py-3 text-xs text-blue-700">
         <strong>¿Qué pasa después de cargar?</strong> Tavex registra el archivo, detecta duplicados
         automáticamente y lo pone en cola para extracción con Gemini (activo en Fase 2). Podés
         revisar y corregir los datos extraídos antes de registrarlos definitivamente.

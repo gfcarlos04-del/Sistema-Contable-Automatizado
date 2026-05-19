@@ -27,63 +27,63 @@ export default async function UsuariosPage() {
   const currentUserId = session.user.id;
 
   return (
-    <div>
+    <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Usuarios</h1>
-        <p className="mt-1 text-sm text-gray-600">
+        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Usuarios</h1>
+        <p className="mt-1 text-sm text-gray-500">
           Gestioná los usuarios de tu organización.
         </p>
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-lg border border-gray-200">
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-600">
+          <thead className="bg-gray-50">
             <tr>
-              <th className="px-4 py-2 text-left">Nombre</th>
-              <th className="px-4 py-2 text-left">Email</th>
-              <th className="px-4 py-2 text-center">Rol</th>
-              <th className="px-4 py-2 text-center">Estado</th>
-              <th className="px-4 py-2 text-left">Creado</th>
-              <th className="px-4 py-2 text-right">Acciones</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold tracking-wide text-gray-500 uppercase">Nombre</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold tracking-wide text-gray-500 uppercase">Email</th>
+              <th className="px-4 py-3 text-center text-xs font-semibold tracking-wide text-gray-500 uppercase">Rol</th>
+              <th className="px-4 py-3 text-center text-xs font-semibold tracking-wide text-gray-500 uppercase">Estado</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold tracking-wide text-gray-500 uppercase">Creado</th>
+              <th className="px-4 py-3 text-right text-xs font-semibold tracking-wide text-gray-500 uppercase">Acciones</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-100">
             {usuarios.map((u) => {
               const esYo = u.id === currentUserId;
               return (
-                <tr key={u.id} className={u.activo ? "" : "bg-gray-50 text-gray-400"}>
-                  <td className="px-4 py-3 font-medium">
+                <tr key={u.id} className={`hover:bg-gray-50 transition-colors ${u.activo ? "" : "opacity-60"}`}>
+                  <td className="px-4 py-3 text-sm text-gray-700 font-medium">
                     {u.nombre}
                     {esYo && (
-                      <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-700">
+                      <span className="ml-2 rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-700">
                         tú
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{u.email}</td>
+                  <td className="px-4 py-3 text-sm text-gray-700">{u.email}</td>
                   <td className="px-4 py-3 text-center">
                     {u.rol === "ADMIN" ? (
-                      <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+                      <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-indigo-100 text-indigo-700">
                         Admin
                       </span>
                     ) : (
-                      <span className="rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-700">
+                      <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-600">
                         Operador
                       </span>
                     )}
                   </td>
                   <td className="px-4 py-3 text-center">
                     {u.activo ? (
-                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+                      <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-700">
                         Activo
                       </span>
                     ) : (
-                      <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                      <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-red-100 text-red-700">
                         Inactivo
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-gray-500 tabular-nums">
+                  <td className="px-4 py-3 text-sm text-gray-700 tabular-nums">
                     {new Date(u.creadoEn).toLocaleDateString("es-PY", {
                       day: "2-digit",
                       month: "2-digit",
@@ -103,7 +103,7 @@ export default async function UsuariosPage() {
                           type="submit"
                           disabled={esYo}
                           title={esYo ? "No podés desactivarte a vos mismo" : u.activo ? "Desactivar" : "Activar"}
-                          className="rounded-md border border-gray-300 px-2 py-1 text-xs font-medium hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                          className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
                         >
                           {u.activo ? "Desactivar" : "Activar"}
                         </button>
@@ -120,7 +120,7 @@ export default async function UsuariosPage() {
                           type="submit"
                           disabled={esYo}
                           title={esYo ? "No podés cambiar tu propio rol" : u.rol === "ADMIN" ? "Pasar a Operador" : "Pasar a Admin"}
-                          className="rounded-md border border-gray-300 px-2 py-1 text-xs font-medium hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                          className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
                         >
                           {u.rol === "ADMIN" ? "→ Operador" : "→ Admin"}
                         </button>
@@ -134,7 +134,10 @@ export default async function UsuariosPage() {
         </table>
       </div>
 
-      <NuevoUsuarioForm />
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+        <h2 className="mb-5 text-base font-semibold text-gray-900">Nuevo usuario</h2>
+        <NuevoUsuarioForm />
+      </div>
     </div>
   );
 }

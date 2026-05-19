@@ -67,67 +67,69 @@ export default async function AuditoriaPage(props: {
       </p>
 
       {/* Filter form */}
-      <form method="GET" className="mt-6 flex flex-wrap items-end gap-3">
-        <div>
-          <label className="block text-xs font-medium text-gray-600">Entidad</label>
-          <input
-            type="text"
-            name="entidad"
-            defaultValue={entidadFiltro}
-            placeholder="Comprobante, Cliente…"
-            className="mt-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm"
-          />
-        </div>
+      <form method="GET" className="mt-6 bg-white rounded-xl border border-gray-200 shadow-sm px-5 py-4">
+        <div className="flex flex-wrap items-end gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Entidad</label>
+            <input
+              type="text"
+              name="entidad"
+              defaultValue={entidadFiltro}
+              placeholder="Comprobante, Cliente…"
+              className="mt-1 rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+          </div>
 
-        <div>
-          <label className="block text-xs font-medium text-gray-600">Usuario</label>
-          <select
-            name="usuarioId"
-            defaultValue={usuarioFiltro}
-            className="mt-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm"
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Usuario</label>
+            <select
+              name="usuarioId"
+              defaultValue={usuarioFiltro}
+              className="mt-1 rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
+            >
+              <option value="">Todos</option>
+              {usuarios.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.nombre || u.email}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Desde</label>
+            <input
+              type="date"
+              name="desde"
+              defaultValue={fechaDesde}
+              className="mt-1 rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Hasta</label>
+            <input
+              type="date"
+              name="hasta"
+              defaultValue={fechaHasta}
+              className="mt-1 rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors shadow-sm"
           >
-            <option value="">Todos</option>
-            {usuarios.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.nombre || u.email}
-              </option>
-            ))}
-          </select>
+            Filtrar
+          </button>
+
+          <a
+            href="/app/auditoria"
+            className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            Limpiar
+          </a>
         </div>
-
-        <div>
-          <label className="block text-xs font-medium text-gray-600">Desde</label>
-          <input
-            type="date"
-            name="desde"
-            defaultValue={fechaDesde}
-            className="mt-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-medium text-gray-600">Hasta</label>
-          <input
-            type="date"
-            name="hasta"
-            defaultValue={fechaHasta}
-            className="mt-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm"
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="rounded-md bg-gray-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-gray-700"
-        >
-          Filtrar
-        </button>
-
-        <a
-          href="/app/auditoria"
-          className="rounded-md border border-gray-300 px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          Limpiar
-        </a>
       </form>
 
       {/* Results */}
@@ -138,7 +140,7 @@ export default async function AuditoriaPage(props: {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <div className="overflow-hidden rounded-lg border border-gray-200">
+            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
               <table className="min-w-full divide-y divide-gray-200 text-sm">
                 <thead className="bg-gray-50">
                   <tr>
@@ -165,16 +167,16 @@ export default async function AuditoriaPage(props: {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 bg-white">
+                <tbody className="divide-y divide-gray-100">
                   {registros.map((r) => (
-                    <tr key={r.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-xs whitespace-nowrap text-gray-500">
+                    <tr key={r.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 text-xs whitespace-nowrap text-gray-700">
                         {new Date(r.creadoEn).toLocaleString("es-PY")}
                       </td>
-                      <td className="px-4 py-3 text-gray-700">
+                      <td className="px-4 py-3 text-sm text-gray-700">
                         {r.usuario.nombre || r.usuario.email}
                       </td>
-                      <td className="px-4 py-3 text-gray-700">{r.entidad}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700">{r.entidad}</td>
                       <td className="px-4 py-3">
                         <span className="font-mono text-xs text-gray-500" title={r.idEntidad}>
                           {r.idEntidad.slice(0, 8)}…
@@ -182,18 +184,20 @@ export default async function AuditoriaPage(props: {
                       </td>
                       <td className="px-4 py-3 font-mono text-xs text-gray-700">{r.campo}</td>
                       <td className="px-4 py-3 text-xs">
-                        {r.valorAnterior != null && (
-                          <span className="mr-1 text-red-600 line-through">{r.valorAnterior}</span>
-                        )}
-                        {r.valorAnterior != null && r.valorNuevo != null && (
-                          <span className="mr-1 text-gray-400">→</span>
-                        )}
-                        {r.valorNuevo != null && (
-                          <span className="text-green-700">{r.valorNuevo}</span>
-                        )}
-                        {r.valorAnterior == null && r.valorNuevo == null && (
-                          <span className="text-gray-400">—</span>
-                        )}
+                        <span className="inline-flex items-center gap-1 flex-wrap">
+                          {r.valorAnterior != null && (
+                            <span className="rounded bg-red-50 px-1.5 py-0.5 text-red-600 line-through">{r.valorAnterior}</span>
+                          )}
+                          {r.valorAnterior != null && r.valorNuevo != null && (
+                            <span className="text-gray-400 font-medium">→</span>
+                          )}
+                          {r.valorNuevo != null && (
+                            <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-emerald-700">{r.valorNuevo}</span>
+                          )}
+                          {r.valorAnterior == null && r.valorNuevo == null && (
+                            <span className="text-gray-400">—</span>
+                          )}
+                        </span>
                       </td>
                       <td className="px-4 py-3 text-xs text-gray-500">
                         {r.motivo ?? <span className="text-gray-300">—</span>}

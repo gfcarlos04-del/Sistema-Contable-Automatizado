@@ -23,11 +23,11 @@ const ESTADO_LABEL: Record<string, string> = {
 };
 
 const ESTADO_BADGE: Record<string, string> = {
-  CARGADO: "bg-gray-100 text-gray-700",
+  CARGADO: "bg-gray-100 text-gray-600",
   EXTRAYENDO: "bg-blue-100 text-blue-700",
   EXTRAIDO: "bg-yellow-100 text-yellow-800",
   EN_REVISION: "bg-orange-100 text-orange-700",
-  REGISTRADO: "bg-green-100 text-green-700",
+  REGISTRADO: "bg-emerald-100 text-emerald-700",
   PENDIENTE: "bg-gray-100 text-gray-600",
   RECHAZADO: "bg-red-100 text-red-700",
   DUPLICADO: "bg-purple-100 text-purple-700",
@@ -158,7 +158,7 @@ export default async function ComprobantesPage(props: {
         </div>
         <Link
           href="/app/comprobantes/nuevo"
-          className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700"
+          className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors shadow-sm"
         >
           + Cargar comprobante
         </Link>
@@ -168,101 +168,103 @@ export default async function ComprobantesPage(props: {
       <form
         method="get"
         action="/app/comprobantes"
-        className="mt-6 flex flex-wrap items-end gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3"
+        className="mt-6 bg-white rounded-xl border border-gray-200 shadow-sm px-5 py-4"
       >
-        {/* Estado */}
-        <div>
-          <label
-            htmlFor="filtro-estado"
-            className="block text-xs font-medium text-gray-600"
-          >
-            Estado
-          </label>
-          <select
-            id="filtro-estado"
-            name="estado"
-            defaultValue={estadoParam}
-            className="mt-1 rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm"
-          >
-            <option value="">Todos</option>
-            <option value="CARGADO">Cargado</option>
-            <option value="EXTRAYENDO">Extrayendo</option>
-            <option value="EXTRAIDO">Extraído</option>
-            <option value="EN_REVISION">En revisión</option>
-            <option value="REGISTRADO">Registrado</option>
-            <option value="RECHAZADO">Rechazado</option>
-            <option value="DUPLICADO">Duplicado</option>
-          </select>
-        </div>
-
-        {/* Búsqueda */}
-        <div>
-          <label
-            htmlFor="filtro-q"
-            className="block text-xs font-medium text-gray-600"
-          >
-            Búsqueda
-          </label>
-          <input
-            id="filtro-q"
-            name="q"
-            type="text"
-            defaultValue={q}
-            placeholder="N°, timbrado, contraparte, RUC…"
-            className="mt-1 w-56 rounded-md border border-gray-300 px-2 py-1.5 text-sm"
-          />
-        </div>
-
-        {/* Desde */}
-        <div>
-          <label
-            htmlFor="filtro-desde"
-            className="block text-xs font-medium text-gray-600"
-          >
-            Desde
-          </label>
-          <input
-            id="filtro-desde"
-            name="desde"
-            type="date"
-            defaultValue={desde}
-            className="mt-1 rounded-md border border-gray-300 px-2 py-1.5 text-sm"
-          />
-        </div>
-
-        {/* Hasta */}
-        <div>
-          <label
-            htmlFor="filtro-hasta"
-            className="block text-xs font-medium text-gray-600"
-          >
-            Hasta
-          </label>
-          <input
-            id="filtro-hasta"
-            name="hasta"
-            type="date"
-            defaultValue={hasta}
-            className="mt-1 rounded-md border border-gray-300 px-2 py-1.5 text-sm"
-          />
-        </div>
-
-        {/* Acciones */}
-        <div className="flex gap-2">
-          <button
-            type="submit"
-            className="rounded-md bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700"
-          >
-            Filtrar
-          </button>
-          {hayFiltros && (
-            <Link
-              href="/app/comprobantes"
-              className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        <div className="flex flex-wrap items-end gap-4">
+          {/* Estado */}
+          <div>
+            <label
+              htmlFor="filtro-estado"
+              className="block text-sm font-medium text-gray-700"
             >
-              Limpiar
-            </Link>
-          )}
+              Estado
+            </label>
+            <select
+              id="filtro-estado"
+              name="estado"
+              defaultValue={estadoParam}
+              className="mt-1 rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
+            >
+              <option value="">Todos</option>
+              <option value="CARGADO">Cargado</option>
+              <option value="EXTRAYENDO">Extrayendo</option>
+              <option value="EXTRAIDO">Extraído</option>
+              <option value="EN_REVISION">En revisión</option>
+              <option value="REGISTRADO">Registrado</option>
+              <option value="RECHAZADO">Rechazado</option>
+              <option value="DUPLICADO">Duplicado</option>
+            </select>
+          </div>
+
+          {/* Búsqueda */}
+          <div>
+            <label
+              htmlFor="filtro-q"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Búsqueda
+            </label>
+            <input
+              id="filtro-q"
+              name="q"
+              type="text"
+              defaultValue={q}
+              placeholder="N°, timbrado, contraparte, RUC…"
+              className="mt-1 w-60 rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+          </div>
+
+          {/* Desde */}
+          <div>
+            <label
+              htmlFor="filtro-desde"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Desde
+            </label>
+            <input
+              id="filtro-desde"
+              name="desde"
+              type="date"
+              defaultValue={desde}
+              className="mt-1 rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+          </div>
+
+          {/* Hasta */}
+          <div>
+            <label
+              htmlFor="filtro-hasta"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Hasta
+            </label>
+            <input
+              id="filtro-hasta"
+              name="hasta"
+              type="date"
+              defaultValue={hasta}
+              className="mt-1 rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+          </div>
+
+          {/* Acciones */}
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors shadow-sm"
+            >
+              Filtrar
+            </button>
+            {hayFiltros && (
+              <Link
+                href="/app/comprobantes"
+                className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Limpiar
+              </Link>
+            )}
+          </div>
         </div>
       </form>
 
@@ -289,14 +291,14 @@ export default async function ComprobantesPage(props: {
           {!hayFiltros && (
             <Link
               href="/app/comprobantes/nuevo"
-              className="mt-5 inline-block rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700"
+              className="mt-5 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors shadow-sm"
             >
               Cargar el primero
             </Link>
           )}
         </div>
       ) : (
-        <div className="mt-3 overflow-hidden rounded-lg border border-gray-200">
+        <div className="mt-3 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
           <table className="min-w-full divide-y divide-gray-200 text-sm">
             <thead className="bg-gray-50">
               <tr>
@@ -334,7 +336,7 @@ export default async function ComprobantesPage(props: {
                   <td className="px-4 py-3">
                     <Link
                       href={`/app/comprobantes/${c.id}`}
-                      className="font-medium text-gray-900 hover:underline"
+                      className="font-medium text-gray-900 hover:text-indigo-600 transition-colors"
                     >
                       {c.timbrado && c.numero ? (
                         <span className="font-mono">
@@ -348,11 +350,11 @@ export default async function ComprobantesPage(props: {
                     </Link>
                   </td>
 
-                  <td className="px-4 py-3 text-gray-600">
+                  <td className="px-4 py-3 text-sm text-gray-700">
                     {c.nombreContraparte ?? <span className="text-gray-400">—</span>}
                   </td>
 
-                  <td className="px-4 py-3 text-right font-mono text-gray-900">
+                  <td className="px-4 py-3 text-right font-mono text-sm text-gray-700">
                     {Number(c.total) > 0 ? (
                       Number(c.total).toLocaleString("es-PY")
                     ) : (
@@ -360,7 +362,7 @@ export default async function ComprobantesPage(props: {
                     )}
                   </td>
 
-                  <td className="px-4 py-3 text-gray-600">
+                  <td className="px-4 py-3 text-sm text-gray-700">
                     {c.fechaEmision ? (
                       new Date(c.fechaEmision).toLocaleDateString("es-PY")
                     ) : (
@@ -368,7 +370,7 @@ export default async function ComprobantesPage(props: {
                     )}
                   </td>
 
-                  <td className="px-4 py-3 text-xs text-gray-500">
+                  <td className="px-4 py-3 text-sm text-gray-700">
                     {new Date(c.creadoEn).toLocaleDateString("es-PY")}
                   </td>
                 </tr>
@@ -385,7 +387,7 @@ export default async function ComprobantesPage(props: {
                 {page > 1 && (
                   <Link
                     href={pageUrl(page - 1)}
-                    className="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                   >
                     ← Anterior
                   </Link>
@@ -393,7 +395,7 @@ export default async function ComprobantesPage(props: {
                 {page < totalPages && (
                   <Link
                     href={pageUrl(page + 1)}
-                    className="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                   >
                     Siguiente →
                   </Link>

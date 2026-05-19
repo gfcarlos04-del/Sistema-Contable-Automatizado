@@ -34,8 +34,8 @@ export default async function ConfiguracionPage() {
       </div>
 
       {/* Estado del sistema */}
-      <section className="rounded-lg border border-gray-200 bg-white p-6">
-        <h2 className="text-base font-semibold text-gray-800">Estado del sistema</h2>
+      <section className="rounded-xl border border-gray-200 bg-white shadow-sm p-6">
+        <h2 className="text-base font-semibold text-gray-900">Estado del sistema</h2>
         <div className="mt-4 divide-y divide-gray-100">
           <div className="flex items-center justify-between py-3">
             <div>
@@ -73,8 +73,8 @@ export default async function ConfiguracionPage() {
       </section>
 
       {/* API Key Gemini */}
-      <section className="rounded-lg border border-gray-200 bg-white p-6">
-        <h2 className="text-base font-semibold text-gray-800">API Key de Gemini</h2>
+      <section className="rounded-xl border border-gray-200 bg-white shadow-sm p-6">
+        <h2 className="text-base font-semibold text-gray-900">API Key de Gemini</h2>
         <p className="mt-1 text-sm text-gray-600">
           Se guarda cifrada en reposo con AES-256-GCM. Nunca llega al frontend.
         </p>

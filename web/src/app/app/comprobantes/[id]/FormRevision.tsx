@@ -198,8 +198,13 @@ export function FormRevision({
   const bloqueantes = allErrors.filter((e) => e.severidad === "BLOQ");
   const advertencias = allErrors.filter((e) => e.severidad === "ADV");
 
+  const inputCls = "mt-1 w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:bg-gray-50 disabled:text-gray-500";
+  const inputMonoCls = `${inputCls} font-mono`;
+  const labelCls = "block text-sm font-medium text-gray-700";
+  const sectionCls = "bg-white rounded-xl border border-gray-200 shadow-sm p-5";
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Blocking errors */}
       {bloqueantes.length > 0 && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4">
@@ -228,7 +233,7 @@ export function FormRevision({
       )}
 
       {saveResult?.ok && (
-        <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-700">
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-700">
           Cambios guardados correctamente.
         </div>
       )}
@@ -245,19 +250,19 @@ export function FormRevision({
             setClientError(null);
           }
         }}
-        className="space-y-6"
+        className="space-y-5"
       >
-        {/* Tipo de registro y comprobante */}
-        <section>
-          <h3 className="mb-3 text-sm font-semibold text-gray-700">Clasificación</h3>
+        {/* Grupo 1: Identificación */}
+        <section className={sectionCls}>
+          <h3 className="mb-4 text-base font-semibold text-gray-900">Identificación</h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-600">Tipo de registro</label>
+              <label className={labelCls}>Tipo de registro</label>
               <select
                 name="tipoRegistro"
                 defaultValue={initial.tipoRegistro || 2}
                 disabled={readOnly}
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm disabled:bg-gray-50"
+                className={inputCls}
               >
                 {TIPO_REGISTRO_OPTS.map((o) => (
                   <option key={o.value} value={o.value}>
@@ -267,7 +272,7 @@ export function FormRevision({
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600">
+              <label className={labelCls}>
                 Tipo de comprobante
                 <ConfianzaBadge campo="document_type" campos={campos} />
               </label>
@@ -275,7 +280,7 @@ export function FormRevision({
                 name="tipoComprobante"
                 defaultValue={initial.tipoComprobante || 109}
                 disabled={readOnly}
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm disabled:bg-gray-50"
+                className={inputCls}
               >
                 <option value={0}>— Pendiente —</option>
                 {TIPO_COMPROBANTE_OPTS.map((o) => (
@@ -285,15 +290,33 @@ export function FormRevision({
                 ))}
               </select>
             </div>
-          </div>
-        </section>
-
-        {/* Identificación */}
-        <section>
-          <h3 className="mb-3 text-sm font-semibold text-gray-700">Identificación</h3>
-          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-600">
+              <label className={labelCls}>
+                Fecha de emisión
+                <ConfianzaBadge campo="fecha_emision" campos={campos} />
+              </label>
+              <input
+                type="date"
+                name="fechaEmision"
+                defaultValue={initial.fechaEmision ?? ""}
+                disabled={readOnly}
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className={labelCls}>Condición de operación</label>
+              <select
+                name="condicionOperacion"
+                defaultValue={initial.condicionOperacion ?? 1}
+                disabled={readOnly}
+                className={inputCls}
+              >
+                <option value={1}>Contado</option>
+                <option value={2}>Crédito</option>
+              </select>
+            </div>
+            <div>
+              <label className={labelCls}>
                 Timbrado
                 <ConfianzaBadge campo="timbrado" campos={campos} />
               </label>
@@ -303,11 +326,11 @@ export function FormRevision({
                 defaultValue={initial.timbrado ?? ""}
                 disabled={readOnly}
                 placeholder="12345678"
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm disabled:bg-gray-50"
+                className={inputMonoCls}
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600">
+              <label className={labelCls}>
                 Número
                 <ConfianzaBadge campo="numero_comprobante" campos={campos} />
               </label>
@@ -317,45 +340,18 @@ export function FormRevision({
                 defaultValue={initial.numero ?? ""}
                 disabled={readOnly}
                 placeholder="001-001-0000001"
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm disabled:bg-gray-50"
+                className={inputMonoCls}
               />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-600">
-                Fecha de emisión
-                <ConfianzaBadge campo="fecha_emision" campos={campos} />
-              </label>
-              <input
-                type="date"
-                name="fechaEmision"
-                defaultValue={initial.fechaEmision ?? ""}
-                disabled={readOnly}
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm disabled:bg-gray-50"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-600">
-                Condición de operación
-              </label>
-              <select
-                name="condicionOperacion"
-                defaultValue={initial.condicionOperacion ?? 1}
-                disabled={readOnly}
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm disabled:bg-gray-50"
-              >
-                <option value={1}>Contado</option>
-                <option value={2}>Crédito</option>
-              </select>
             </div>
           </div>
         </section>
 
-        {/* Contraparte */}
-        <section>
-          <h3 className="mb-3 text-sm font-semibold text-gray-700">Contraparte</h3>
+        {/* Grupo 2: Contraparte */}
+        <section className={sectionCls}>
+          <h3 className="mb-4 text-base font-semibold text-gray-900">Contraparte</h3>
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
-              <label className="block text-xs font-medium text-gray-600">
+              <label className={labelCls}>
                 Nombre / Razón social
                 <ConfianzaBadge campo="nombre_emisor" campos={campos} />
               </label>
@@ -364,11 +360,11 @@ export function FormRevision({
                 name="nombreContraparte"
                 defaultValue={initial.nombreContraparte ?? ""}
                 disabled={readOnly}
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm disabled:bg-gray-50"
+                className={inputCls}
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600">
+              <label className={labelCls}>
                 RUC
                 <ConfianzaBadge campo="ruc_emisor" campos={campos} />
               </label>
@@ -378,11 +374,11 @@ export function FormRevision({
                 defaultValue={initial.rucContraparte ?? ""}
                 disabled={readOnly}
                 placeholder="80024627"
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm disabled:bg-gray-50"
+                className={inputMonoCls}
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600">
+              <label className={labelCls}>
                 DV
                 <ConfianzaBadge campo="dv_emisor" campos={campos} />
               </label>
@@ -393,18 +389,16 @@ export function FormRevision({
                 disabled={readOnly}
                 min={0}
                 max={9}
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm disabled:bg-gray-50"
+                className={inputCls}
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600">
-                Tipo de identificación
-              </label>
+              <label className={labelCls}>Tipo de identificación</label>
               <select
                 name="tipoIdentificacionContraparte"
                 defaultValue={initial.tipoIdentificacionContraparte ?? 11}
                 disabled={readOnly}
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm disabled:bg-gray-50"
+                className={inputCls}
               >
                 <option value={11}>RUC</option>
                 <option value={12}>Cédula</option>
@@ -415,12 +409,12 @@ export function FormRevision({
           </div>
         </section>
 
-        {/* Montos */}
-        <section>
-          <h3 className="mb-3 text-sm font-semibold text-gray-700">Montos (₲)</h3>
+        {/* Grupo 3: Montos */}
+        <section className={sectionCls}>
+          <h3 className="mb-4 text-base font-semibold text-gray-900">Montos (₲)</h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-600">
+              <label className={labelCls}>
                 Gravado 10%
                 <ConfianzaBadge campo="monto_gravado_10_iva_incluido" campos={campos} />
               </label>
@@ -430,11 +424,11 @@ export function FormRevision({
                 defaultValue={initial.montoGravado10}
                 disabled={readOnly}
                 min={0}
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm disabled:bg-gray-50"
+                className={inputMonoCls}
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600">
+              <label className={labelCls}>
                 IVA 10%
                 <ConfianzaBadge campo="iva_10" campos={campos} />
               </label>
@@ -444,11 +438,11 @@ export function FormRevision({
                 defaultValue={initial.iva10}
                 disabled={readOnly}
                 min={0}
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm disabled:bg-gray-50"
+                className={inputMonoCls}
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600">
+              <label className={labelCls}>
                 Gravado 5%
                 <ConfianzaBadge campo="monto_gravado_5_iva_incluido" campos={campos} />
               </label>
@@ -458,11 +452,11 @@ export function FormRevision({
                 defaultValue={initial.montoGravado5}
                 disabled={readOnly}
                 min={0}
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm disabled:bg-gray-50"
+                className={inputMonoCls}
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600">
+              <label className={labelCls}>
                 IVA 5%
                 <ConfianzaBadge campo="iva_5" campos={campos} />
               </label>
@@ -472,11 +466,11 @@ export function FormRevision({
                 defaultValue={initial.iva5}
                 disabled={readOnly}
                 min={0}
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm disabled:bg-gray-50"
+                className={inputMonoCls}
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600">
+              <label className={labelCls}>
                 Exento
                 <ConfianzaBadge campo="exento" campos={campos} />
               </label>
@@ -486,12 +480,12 @@ export function FormRevision({
                 defaultValue={initial.exento}
                 disabled={readOnly}
                 min={0}
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm disabled:bg-gray-50"
+                className={inputMonoCls}
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600">
-                Total
+              <label className={labelCls}>
+                <span className="font-semibold">Total</span>
                 <ConfianzaBadge campo="total" campos={campos} />
               </label>
               <input
@@ -500,15 +494,15 @@ export function FormRevision({
                 defaultValue={initial.total}
                 disabled={readOnly}
                 min={0}
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm font-semibold disabled:bg-gray-50"
+                className={`${inputMonoCls} font-semibold`}
               />
             </div>
           </div>
         </section>
 
-        {/* Imputaciones */}
-        <section>
-          <h3 className="mb-3 text-sm font-semibold text-gray-700">Imputaciones</h3>
+        {/* Grupo 4: Imputación */}
+        <section className={sectionCls}>
+          <h3 className="mb-4 text-base font-semibold text-gray-900">Imputación</h3>
           <div className="grid grid-cols-2 gap-3">
             {[
               { name: "imputaIva", label: "Imputa IVA", initial: initial.imputaIva },
@@ -516,14 +510,14 @@ export function FormRevision({
               { name: "imputaIrpRsp", label: "Imputa IRP-RSP", initial: initial.imputaIrpRsp },
               { name: "noImputa", label: "No Imputa", initial: initial.noImputa },
             ].map((item) => (
-              <label key={item.name} className="flex items-center gap-2 text-sm">
+              <label key={item.name} className="flex items-center gap-2.5 text-sm font-medium text-gray-700 cursor-pointer">
                 <input
                   type="checkbox"
                   name={item.name}
                   value="S"
                   defaultChecked={item.initial === "S"}
                   disabled={readOnly}
-                  className="h-4 w-4 rounded border-gray-300"
+                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                 />
                 {item.label}
               </label>
@@ -531,42 +525,41 @@ export function FormRevision({
           </div>
         </section>
 
-        {/* Comprobante asociado */}
-        <section>
-          <h3 className="mb-3 text-sm font-semibold text-gray-700">
-            Comprobante asociado (opcional)
-          </h3>
+        {/* Grupo 5: Comprobante asociado */}
+        <section className={sectionCls}>
+          <h3 className="mb-1 text-base font-semibold text-gray-900">Comprobante asociado</h3>
+          <p className="mb-4 text-xs text-gray-500">Completar solo si es Nota de Crédito o Débito.</p>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-600">Número asociado</label>
+              <label className={labelCls}>Número asociado</label>
               <input
                 type="text"
                 name="comprobanteAsociadoNumero"
                 defaultValue={initial.comprobanteAsociadoNumero ?? ""}
                 disabled={readOnly}
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm disabled:bg-gray-50"
+                className={inputMonoCls}
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600">Timbrado asociado</label>
+              <label className={labelCls}>Timbrado asociado</label>
               <input
                 type="text"
                 name="comprobanteAsociadoTimbrado"
                 defaultValue={initial.comprobanteAsociadoTimbrado ?? ""}
                 disabled={readOnly}
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm disabled:bg-gray-50"
+                className={inputMonoCls}
               />
             </div>
           </div>
         </section>
 
-        {/* Action buttons */}
+        {/* Botón guardar */}
         {!readOnly && (
-          <div className="flex flex-wrap gap-3 border-t border-gray-100 pt-4">
+          <div className="flex flex-wrap gap-3">
             <button
               type="submit"
               disabled={saving}
-              className="rounded-md bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
               {saving ? "Guardando…" : "Guardar cambios"}
             </button>
@@ -576,63 +569,66 @@ export function FormRevision({
 
       {/* Approve / Reject / Re-extract — separate forms */}
       {!readOnly && (
-        <div className="flex flex-wrap items-center gap-3 border-t border-gray-100 pt-4">
-          <form
-            action={approveAction}
-            onSubmit={(e) => {
-              const err = validateForm();
-              if (err) {
-                e.preventDefault();
-                setClientError(err);
-              } else {
-                setClientError(null);
-              }
-            }}
-          >
-            <button
-              type="submit"
-              disabled={approving}
-              className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+          <h3 className="mb-4 text-base font-semibold text-gray-900">Acciones</h3>
+          <div className="flex flex-wrap items-center gap-3">
+            <form
+              action={approveAction}
+              onSubmit={(e) => {
+                const err = validateForm();
+                if (err) {
+                  e.preventDefault();
+                  setClientError(err);
+                } else {
+                  setClientError(null);
+                }
+              }}
             >
-              {approving ? "Aprobando…" : "Aprobar y registrar"}
-            </button>
-          </form>
-
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              placeholder="Motivo del rechazo…"
-              value={rejectMotivo}
-              onChange={(e) => setRejectMotivo(e.target.value)}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm"
-            />
-            <form action={rejectAction}>
               <button
                 type="submit"
-                disabled={rejecting}
-                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                disabled={approving}
+                className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors shadow-sm disabled:opacity-50"
               >
-                {rejecting ? "Rechazando…" : "Rechazar"}
+                {approving ? "Aprobando…" : "Aprobar y registrar"}
               </button>
             </form>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                placeholder="Motivo del rechazo…"
+                value={rejectMotivo}
+                onChange={(e) => setRejectMotivo(e.target.value)}
+                className="rounded-lg border border-gray-300 px-3.5 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+              <form action={rejectAction}>
+                <button
+                  type="submit"
+                  disabled={rejecting}
+                  className="rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors disabled:opacity-50"
+                >
+                  {rejecting ? "Rechazando…" : "Rechazar"}
+                </button>
+              </form>
+            </div>
+
+            <form action={reextractAction}>
+              <button
+                type="submit"
+                disabled={reextracting}
+                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                {reextracting ? "Re-enviando…" : "Re-extraer con Gemini"}
+              </button>
+            </form>
+
+            {reextractResult?.ok && (
+              <span className="text-sm text-blue-600">
+                Re-extracción encolada. Refrescá en unos segundos.
+              </span>
+            )}
+            {rejectResult?.ok && <span className="text-sm text-red-600">Comprobante rechazado.</span>}
           </div>
-
-          <form action={reextractAction}>
-            <button
-              type="submit"
-              disabled={reextracting}
-              className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-            >
-              {reextracting ? "Re-enviando…" : "Re-extraer con Gemini"}
-            </button>
-          </form>
-
-          {reextractResult?.ok && (
-            <span className="text-sm text-blue-600">
-              Re-extracción encolada. Refrescá en unos segundos.
-            </span>
-          )}
-          {rejectResult?.ok && <span className="text-sm text-red-600">Comprobante rechazado.</span>}
         </div>
       )}
     </div>

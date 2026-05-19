@@ -35,9 +35,9 @@ export default async function ClientesPage() {
         {esAdmin && (
           <Link
             href="/app/clientes/nuevo"
-            className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors shadow-sm"
           >
-            Nuevo cliente
+            + Nuevo cliente
           </Link>
         )}
       </div>
@@ -56,46 +56,46 @@ export default async function ClientesPage() {
           )}
         </div>
       ) : (
-        <div className="mt-6 overflow-hidden rounded-lg border border-gray-200">
+        <div className="mt-6 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-xs tracking-wide text-gray-600 uppercase">
+            <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-2 text-left">Razón social</th>
-                <th className="px-4 py-2 text-left">RUC</th>
-                <th className="px-4 py-2 text-left">Régimen</th>
-                <th className="px-4 py-2 text-right">Comprobantes</th>
-                <th className="px-4 py-2 text-center">Estado</th>
-                <th className="px-4 py-2"></th>
+                <th className="px-4 py-3 text-left text-xs font-semibold tracking-wide text-gray-500 uppercase">Razón social</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold tracking-wide text-gray-500 uppercase">RUC</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold tracking-wide text-gray-500 uppercase">Régimen</th>
+                <th className="px-4 py-3 text-right text-xs font-semibold tracking-wide text-gray-500 uppercase">Comprobantes</th>
+                <th className="px-4 py-3 text-center text-xs font-semibold tracking-wide text-gray-500 uppercase">Estado</th>
+                <th className="px-4 py-3"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-100">
               {clientes.map((c) => (
-                <tr key={c.id} className={c.activo ? "" : "bg-gray-50 text-gray-400"}>
-                  <td className="px-4 py-3 font-medium">
-                    <Link href={`/app/clientes/${c.id}`} className="hover:underline">
+                <tr key={c.id} className={`hover:bg-gray-50 transition-colors ${c.activo ? "" : "opacity-60"}`}>
+                  <td className="px-4 py-3">
+                    <Link href={`/app/clientes/${c.id}`} className="font-medium text-gray-900 hover:text-indigo-600 transition-colors">
                       {c.razonSocial}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 font-mono">
+                  <td className="px-4 py-3 font-mono text-sm text-gray-700">
                     {c.ruc}-{c.dv}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1">
                       {c.regimen.map((r) => (
-                        <span key={r} className="rounded-md bg-gray-100 px-2 py-0.5 text-xs">
+                        <span key={r} className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-600">
                           {r.replace("_", "-")}
                         </span>
                       ))}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-right tabular-nums">{c._count.comprobantes}</td>
+                  <td className="px-4 py-3 text-right text-sm text-gray-700 tabular-nums">{c._count.comprobantes}</td>
                   <td className="px-4 py-3 text-center">
                     {c.activo ? (
-                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-800">
+                      <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-700">
                         Activo
                       </span>
                     ) : (
-                      <span className="rounded-full bg-gray-200 px-2 py-0.5 text-xs">Inactivo</span>
+                      <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-600">Inactivo</span>
                     )}
                   </td>
                   <td className="px-4 py-3 text-right">

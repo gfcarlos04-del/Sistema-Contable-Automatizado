@@ -11,15 +11,17 @@ export default async function NuevoClientePage() {
   if (session.user.rol !== "ADMIN") redirect("/app/clientes");
 
   return (
-    <div className="max-w-xl">
+    <div className="max-w-xl space-y-6">
       <div>
-        <Link href="/app/clientes" className="text-xs text-gray-500 hover:underline">
+        <Link href="/app/clientes" className="text-xs font-medium text-gray-500 hover:text-indigo-600 transition-colors">
           ← Volver a clientes
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">Nuevo cliente</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">Nuevo cliente</h1>
       </div>
 
-      <ClienteForm action={crearClienteAction} submitLabel="Crear cliente" />
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+        <ClienteForm action={crearClienteAction} submitLabel="Crear cliente" />
+      </div>
     </div>
   );
 }

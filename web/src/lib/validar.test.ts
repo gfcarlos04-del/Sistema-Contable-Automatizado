@@ -273,6 +273,55 @@ describe("C-004 — Montos enteros (PYG sin decimales)", () => {
   });
 });
 
+// ── V-015 — noImputa requiere otra imputación ─────────────────────────────
+
+describe("V-015 — noImputa=S requiere otra imputación en COMPRAS/EGRESOS", () => {
+  it("no aplica en VENTAS (tipoRegistro=1)", () => {
+    expect(codigos(base({ imputaIva: "N", imputaIre: "N", imputaIrpRsp: "N", noImputa: "S" }))).not.toContain("V-015");
+  });
+
+  it("falla en COMPRAS si noImputa=S y todas las demás son N", () => {
+    expect(
+      codigos(base({ tipoRegistro: 2, imputaIva: "N", imputaIre: "N", imputaIrpRsp: "N", noImputa: "S" })),
+    ).toContain("V-015");
+  });
+
+  it("pasa en COMPRAS si noImputa=S y también imputaIva=S", () => {
+    expect(
+      codigos(base({ tipoRegistro: 2, imputaIva: "S", imputaIre: "N", imputaIrpRsp: "N", noImputa: "S" })),
+    ).not.toContain("V-015");
+  });
+
+  it("falla en EGRESOS si noImputa=S y todas las demás son N", () => {
+    expect(
+      codigos(base({ tipoRegistro: 4, imputaIva: "N", imputaIre: "N", imputaIrpRsp: "N", noImputa: "S" })),
+    ).toContain("V-015");
+  });
+});
+
+// ── V-019 — Tipos especiales en COMPRAS ──────────────────────────────────
+
+describe("V-019 — tipos 101/104/105/112 en COMPRAS: gravados deben ser 0", () => {
+  it("falla si gravado10 > 0 para tipo 101 en COMPRAS", () => {
+    expect(
+      codigos(base({ tipoRegistro: 2, tipoComprobante: 101, montoGravado10: 500_000, iva10: 45_455, total: 500_000 })),
+    ).toContain("V-019");
+  });
+
+  it("pasa si gravado10=gravado5=exento=0 para tipo 101 en COMPRAS", () => {
+    const c = base({ tipoRegistro: 2, tipoComprobante: 101, montoGravado10: 0, iva10: 0, montoGravado5: 0, iva5: 0, exento: 0, total: 500_000 });
+    expect(codigos(c)).not.toContain("V-019");
+  });
+
+  it("no aplica para tipo 101 en VENTAS", () => {
+    expect(codigos(base({ tipoRegistro: 1, tipoComprobante: 101 }))).not.toContain("V-019");
+  });
+
+  it("no aplica para tipo 109 (factura) en COMPRAS", () => {
+    expect(codigos(base({ tipoRegistro: 2, tipoComprobante: 109 }))).not.toContain("V-019");
+  });
+});
+
 // ── K-001 — Baja confianza ────────────────────────────────────────────────
 
 describe("K-001 — Campo crítico baja confianza", () => {
