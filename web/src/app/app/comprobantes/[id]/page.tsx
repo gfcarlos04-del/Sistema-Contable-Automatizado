@@ -167,7 +167,7 @@ export default async function ComprobanteDetallePage(props: { params: Promise<{ 
       </div>
 
       {/* Processing banner */}
-      {isProcesando && <ProcesandoPoller />}
+      {isProcesando && <ProcesandoPoller comprobanteId={comprobante.id} estado={estado} />}
 
       {/* REGISTRADO read-only banner */}
       {estado === "REGISTRADO" && (

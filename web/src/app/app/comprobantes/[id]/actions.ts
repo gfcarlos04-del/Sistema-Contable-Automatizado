@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { validarComprobante, type ErrorValidacion } from "@/lib/validar";
 import { getQueue, COLAS } from "@/lib/queue";
+import { procesarExtraccion } from "@/lib/extraer";
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
@@ -33,7 +34,7 @@ export interface FormData {
   comprobanteAsociadoTimbrado?: string;
 }
 
-export type ActionResult = { ok: boolean; errors?: ErrorValidacion[] };
+export type ActionResult = { ok: boolean; errors?: ErrorValidacion[]; usoCola?: boolean };
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -256,14 +257,40 @@ export async function reextraerComprobante(comprobanteId: string): Promise<Actio
     }),
   ]);
 
-  // Re-enqueue BullMQ job
-  const queue = getQueue(COLAS.EXTRACCION);
-  await queue.add("extraer", {
-    archivoId: comprobante.archivoId,
-    comprobanteId,
-    organizacionId: comprobante.organizacionId,
-    clienteId: comprobante.clienteId,
-  });
+  // Intentar encolar en Redis; si no está configurado, extraer directamente (síncrono).
+  let usoCola = false;
+  try {
+    const queue = getQueue(COLAS.EXTRACCION);
+    await queue.add("extraer", {
+      archivoId: comprobante.archivoId,
+      comprobanteId,
+      organizacionId: comprobante.organizacionId,
+      clienteId: comprobante.clienteId,
+    });
+    usoCola = true;
+  } catch {
+    // Redis no configurado — extraer directamente (puede tardar ~20s)
+  }
 
-  return { ok: true };
+  if (!usoCola) {
+    try {
+      await procesarExtraccion({
+        comprobanteId,
+        archivoId: comprobante.archivoId,
+        organizacionId: comprobante.organizacionId,
+        requestId: `direct-reextract-${Date.now()}`,
+      });
+    } catch (err) {
+      await prisma.comprobante
+        .update({ where: { id: comprobanteId }, data: { estado: "REQUIERE_REVISION_MANUAL" } })
+        .catch(() => {});
+      const msg = err instanceof Error ? err.message : String(err);
+      return {
+        ok: false,
+        errors: [{ codigo: "GEMINI_ERR", mensaje: `Error Gemini: ${msg}`, severidad: "BLOQ" as const }],
+      };
+    }
+  }
+
+  return { ok: true, usoCola };
 }

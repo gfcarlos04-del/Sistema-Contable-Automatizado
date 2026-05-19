@@ -58,6 +58,8 @@ export async function POST(req: NextRequest) {
         organizacionId: session.user.organizacionId,
         clienteId,
         estado: "REGISTRADO",
+        // D-014: excluir e-Kuatia del ZIP Marangatu
+        NOT: { origen: "E_KUATIA_XML" },
         fechaEmision: {
           gte: periodoStart,
           lt: periodoEnd,
