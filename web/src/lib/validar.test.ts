@@ -322,6 +322,66 @@ describe("V-019 — tipos 101/104/105/112 en COMPRAS: gravados deben ser 0", () 
   });
 });
 
+// ── V-010 — Tipo identificación válido ───────────────────────────────────
+
+describe("V-010 — Tipo identificación ∈ Tabla 3", () => {
+  it("pasa para tipo 11 (RUC)", () => {
+    expect(codigos(base({ tipoIdentificacionContraparte: 11 }))).not.toContain("V-010");
+  });
+
+  it("pasa para tipo 12 (CI)", () => {
+    expect(codigos(base({ tipoIdentificacionContraparte: 12 }))).not.toContain("V-010");
+  });
+
+  it("pasa para tipo 17 (Id. Tributaria)", () => {
+    expect(codigos(base({ tipoIdentificacionContraparte: 17 }))).not.toContain("V-010");
+  });
+
+  it("falla para tipo 0", () => {
+    expect(codigos(base({ tipoIdentificacionContraparte: 0 }))).toContain("V-010");
+  });
+
+  it("falla para tipo 99", () => {
+    expect(codigos(base({ tipoIdentificacionContraparte: 99 }))).toContain("V-010");
+  });
+
+  it("no aplica si tipoIdentificacionContraparte es null", () => {
+    expect(codigos(base({ tipoIdentificacionContraparte: null }))).not.toContain("V-010");
+  });
+});
+
+// ── V-011 — Tipo comprobante permitido para tipo de registro ──────────────
+
+describe("V-011 — Tipo comprobante ∈ Tabla 4 y permitido para registro", () => {
+  it("pasa para factura (109) en VENTAS", () => {
+    expect(codigos(base({ tipoRegistro: 1, tipoComprobante: 109 }))).not.toContain("V-011");
+  });
+
+  it("pasa para autofactura (101) en COMPRAS", () => {
+    expect(codigos(base({ tipoRegistro: 2, tipoComprobante: 101, montoGravado10: 0, iva10: 0, total: 500_000 }))).not.toContain("V-011");
+  });
+
+  it("falla para autofactura (101) en VENTAS", () => {
+    expect(codigos(base({ tipoRegistro: 1, tipoComprobante: 101 }))).toContain("V-011");
+  });
+
+  it("pasa para comprobante ingreso a crédito (203) en INGRESOS", () => {
+    expect(codigos(base({ tipoRegistro: 3, tipoComprobante: 203, comprobanteAsociadoNumero: "001-001-0000001", comprobanteAsociadoTimbrado: "12345678" }))).not.toContain("V-011");
+  });
+
+  it("falla para factura (109) en EGRESOS", () => {
+    expect(codigos(base({ tipoRegistro: 4, tipoComprobante: 109 }))).toContain("V-011");
+  });
+
+  it("pasa para transferencia (211) en EGRESOS", () => {
+    expect(codigos(base({ tipoRegistro: 4, tipoComprobante: 211 }))).not.toContain("V-011");
+  });
+
+  it("falla para transferencia (211) en VENTAS", () => {
+    expect(codigos(base({ tipoRegistro: 1, tipoComprobante: 211 }))).toContain("V-011");
+  });
+});
+
 // ── K-001 — Baja confianza ────────────────────────────────────────────────
 
 describe("K-001 — Campo crítico baja confianza", () => {

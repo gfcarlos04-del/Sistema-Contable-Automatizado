@@ -203,13 +203,19 @@ export function AppSidebar({
       {/* User footer */}
       <div className="border-t border-white/10 p-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-semibold text-white">
-            {initials}
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-medium text-white">{userName}</p>
-            <p className="truncate text-[10px] text-slate-400">{userRol === "ADMIN" ? "Admin" : "Operador"}</p>
-          </div>
+          <Link
+            href="/app/perfil"
+            className="flex items-center gap-3 min-w-0 flex-1 rounded-lg p-1 -m-1 hover:bg-white/5 transition-colors"
+            title="Mi perfil"
+          >
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-semibold text-white">
+              {initials}
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-xs font-medium text-white">{userName}</p>
+              <p className="truncate text-[10px] text-slate-400">{userRol === "ADMIN" ? "Admin" : "Operador"}</p>
+            </div>
+          </Link>
           <form action={signOutAction}>
             <button
               type="submit"

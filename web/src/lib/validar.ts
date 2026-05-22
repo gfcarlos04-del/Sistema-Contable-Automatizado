@@ -48,6 +48,17 @@ function toNumber(v: number | bigint): number {
   return typeof v === "bigint" ? Number(v) : v;
 }
 
+// Tabla 3 — Tipo de identificación válidos
+const TIPOS_IDENTIFICACION_VALIDOS = new Set([11, 12, 13, 14, 15, 16, 17]);
+
+// Tabla 4 — Tipos de comprobante por tipo de registro
+const TIPOS_COMPROBANTE_POR_REGISTRO: Record<number, Set<number>> = {
+  1: new Set([102, 103, 105, 106, 108, 109, 110, 111, 112]),
+  2: new Set([101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112]),
+  3: new Set([203, 208, 210]),
+  4: new Set([201, 202, 204, 205, 206, 207, 208, 209, 211]),
+};
+
 const CRITICAL_CAMPOS = [
   "ruc_emisor",
   "timbrado",
@@ -193,6 +204,29 @@ export function validarComprobante(c: ComprobanteParaValidar): ErrorValidacion[]
         campo: "rucContraparte",
       });
     }
+  }
+
+  // V-010: Tipo identificación contraparte ∈ Tabla 3 — BLOQ
+  if (c.tipoIdentificacionContraparte != null) {
+    if (!TIPOS_IDENTIFICACION_VALIDOS.has(c.tipoIdentificacionContraparte)) {
+      errors.push({
+        codigo: "V-010",
+        mensaje: `Tipo de identificación ${c.tipoIdentificacionContraparte} no es válido. Valores permitidos: 11 (RUC), 12 (CI), 13 (Pasaporte), 14 (Cédula Extran.), 15 (Sin nombre), 16 (Diplomático), 17 (Id. Tributaria).`,
+        severidad: "BLOQ",
+        campo: "tipoIdentificacionContraparte",
+      });
+    }
+  }
+
+  // V-011: Tipo comprobante ∈ Tabla 4 y permitido para tipo de registro — BLOQ
+  const tiposPermitidos = TIPOS_COMPROBANTE_POR_REGISTRO[registro];
+  if (tiposPermitidos && !tiposPermitidos.has(tipo)) {
+    errors.push({
+      codigo: "V-011",
+      mensaje: `El tipo de comprobante ${tipo} no está permitido para el tipo de registro ${registro}.`,
+      severidad: "BLOQ",
+      campo: "tipoComprobante",
+    });
   }
 
   // V-012: Nombre obligatorio salvo que tipoIdentificacion ∈ {11,12,15} para ventas
