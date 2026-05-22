@@ -15,6 +15,7 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
+    "db:seed:e2e": "tsx prisma/seed-e2e.ts",
     "worker": "tsx src/worker/index.ts",
     "test": "vitest",
     "test:run": "vitest run",
