@@ -322,6 +322,63 @@ describe("V-019 — tipos 101/104/105/112 en COMPRAS: gravados deben ser 0", () 
   });
 });
 
+// ── V-008 — Condición de operación ───────────────────────────────────────
+
+describe("V-008 — condicionOperacion ∈ {1,2} para tipo 109 (Factura)", () => {
+  it("pasa con condición 1 (Contado)", () => {
+    expect(codigos(base({ condicionOperacion: 1 }))).not.toContain("V-008");
+  });
+
+  it("pasa con condición 2 (Crédito)", () => {
+    expect(codigos(base({ condicionOperacion: 2 }))).not.toContain("V-008");
+  });
+
+  it("falla con condición 3", () => {
+    expect(codigos(base({ condicionOperacion: 3 }))).toContain("V-008");
+  });
+
+  it("falla con condición 0", () => {
+    expect(codigos(base({ condicionOperacion: 0 }))).toContain("V-008");
+  });
+
+  it("no aplica para tipo distinto de 109 (aunque condición sea inválida)", () => {
+    // tipo 103 = Boleta de Venta; V-008 solo aplica a 109
+    expect(codigos(base({ tipoComprobante: 103, condicionOperacion: 99 }))).not.toContain("V-008");
+  });
+
+  it("no aplica si condicionOperacion es null", () => {
+    expect(codigos(base({ condicionOperacion: null }))).not.toContain("V-008");
+  });
+});
+
+// ── V-009 — Moneda extranjera ─────────────────────────────────────────────
+
+describe("V-009 — operacionMonedaExtranjera ∈ {S, N}", () => {
+  it('pasa con valor "S"', () => {
+    expect(codigos(base({ operacionMonedaExtranjera: "S" }))).not.toContain("V-009");
+  });
+
+  it('pasa con valor "N"', () => {
+    expect(codigos(base({ operacionMonedaExtranjera: "N" }))).not.toContain("V-009");
+  });
+
+  it('falla con valor "s" (minúscula)', () => {
+    expect(codigos(base({ operacionMonedaExtranjera: "s" }))).toContain("V-009");
+  });
+
+  it('falla con valor "SI"', () => {
+    expect(codigos(base({ operacionMonedaExtranjera: "SI" }))).toContain("V-009");
+  });
+
+  it("falla con cadena vacía", () => {
+    expect(codigos(base({ operacionMonedaExtranjera: "" }))).toContain("V-009");
+  });
+
+  it("no aplica si operacionMonedaExtranjera es null", () => {
+    expect(codigos(base({ operacionMonedaExtranjera: null }))).not.toContain("V-009");
+  });
+});
+
 // ── V-010 — Tipo identificación válido ───────────────────────────────────
 
 describe("V-010 — Tipo identificación ∈ Tabla 3", () => {

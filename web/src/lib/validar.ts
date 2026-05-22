@@ -40,6 +40,8 @@ export interface ComprobanteParaValidar {
   comprobanteAsociadoTimbrado?: string | null;
   nombreContraparte?: string | null;
   tipoIdentificacionContraparte?: number | null;
+  condicionOperacion?: number | null;
+  operacionMonedaExtranjera?: string | null;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -168,6 +170,30 @@ export function validarComprobante(c: ComprobanteParaValidar): ErrorValidacion[]
           campo: "fechaEmision",
         });
       }
+    }
+  }
+
+  // V-008: Condición de operación ∈ {1,2} — BLOQ — solo para tipo 109 (Factura)
+  if (tipo === 109 && c.condicionOperacion != null) {
+    if (c.condicionOperacion !== 1 && c.condicionOperacion !== 2) {
+      errors.push({
+        codigo: "V-008",
+        mensaje: `La condición de operación debe ser 1 (Contado) o 2 (Crédito). Valor recibido: ${c.condicionOperacion}.`,
+        severidad: "BLOQ",
+        campo: "condicionOperacion",
+      });
+    }
+  }
+
+  // V-009: Moneda extranjera ∈ {S, N} — BLOQ — todos
+  if (c.operacionMonedaExtranjera != null) {
+    if (c.operacionMonedaExtranjera !== "S" && c.operacionMonedaExtranjera !== "N") {
+      errors.push({
+        codigo: "V-009",
+        mensaje: `Operación en moneda extranjera debe ser "S" o "N". Valor recibido: "${c.operacionMonedaExtranjera}".`,
+        severidad: "BLOQ",
+        campo: "operacionMonedaExtranjera",
+      });
     }
   }
 
