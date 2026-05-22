@@ -44,6 +44,10 @@ export interface ComprobanteParaValidar {
   operacionMonedaExtranjera?: string | null;
   fechaPeriodo?: string | null; // MM/AAAA — para tipos 208 y 206
   regimenCliente?: string[] | null; // IVA | IRE | IRE_SIMPLE | IRP_RSP
+  especificarTipoDocumento?: string | null; // V-020 — tipos 209/210
+  numeroCuentaTarjeta?: string | null;      // V-021 — tipos 207/211
+  bancoCoop?: string | null;                // V-021 — tipos 207/211
+  identificadorEmpleador?: string | null;   // V-022 — tipo 206
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -399,6 +403,50 @@ export function validarComprobante(c: ComprobanteParaValidar): ErrorValidacion[]
         mensaje: "El timbrado del comprobante asociado es obligatorio para notas de crédito/débito.",
         severidad: "BLOQ",
         campo: "comprobanteAsociadoTimbrado",
+      });
+    }
+  }
+
+  // V-020: Especificar tipo documento obligatorio para tipos 209 y 210 — BLOQ
+  if ([209, 210].includes(tipo)) {
+    if (!c.especificarTipoDocumento || c.especificarTipoDocumento.trim() === "") {
+      errors.push({
+        codigo: "V-020",
+        mensaje: "Para este tipo de comprobante es obligatorio especificar el tipo de documento (texto libre).",
+        severidad: "BLOQ",
+        campo: "especificarTipoDocumento",
+      });
+    }
+  }
+
+  // V-021: Número de cuenta/tarjeta y banco obligatorios para tipos 207 y 211 — BLOQ
+  if ([207, 211].includes(tipo)) {
+    if (!c.numeroCuentaTarjeta || c.numeroCuentaTarjeta.trim() === "") {
+      errors.push({
+        codigo: "V-021",
+        mensaje: "El número de cuenta/tarjeta es obligatorio para este tipo de comprobante.",
+        severidad: "BLOQ",
+        campo: "numeroCuentaTarjeta",
+      });
+    }
+    if (!c.bancoCoop || c.bancoCoop.trim() === "") {
+      errors.push({
+        codigo: "V-021",
+        mensaje: "El banco/financiera/cooperativa es obligatorio para este tipo de comprobante.",
+        severidad: "BLOQ",
+        campo: "bancoCoop",
+      });
+    }
+  }
+
+  // V-022: Identificador del empleador obligatorio para tipo 206 — BLOQ
+  if (tipo === 206) {
+    if (!c.identificadorEmpleador || c.identificadorEmpleador.trim() === "") {
+      errors.push({
+        codigo: "V-022",
+        mensaje: "El identificador del empleador (IPS) es obligatorio para el Extracto de Cuenta IPS.",
+        severidad: "BLOQ",
+        campo: "identificadorEmpleador",
       });
     }
   }

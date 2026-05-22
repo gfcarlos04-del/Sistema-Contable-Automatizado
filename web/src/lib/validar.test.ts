@@ -570,6 +570,128 @@ describe("V-011 — Tipo comprobante ∈ Tabla 4 y permitido para registro", () 
   });
 });
 
+// ── V-020 — Especificar tipo documento ───────────────────────────────────
+
+describe("V-020 — especificarTipoDocumento para tipos 209 y 210", () => {
+  it("pasa para tipo 209 (Otros egresos) con texto informado", () => {
+    expect(
+      codigos(base({ tipoRegistro: 4, tipoComprobante: 209, especificarTipoDocumento: "Recibo honorarios" })),
+    ).not.toContain("V-020");
+  });
+
+  it("falla para tipo 209 sin especificar documento", () => {
+    expect(
+      codigos(base({ tipoRegistro: 4, tipoComprobante: 209, especificarTipoDocumento: null })),
+    ).toContain("V-020");
+  });
+
+  it("falla para tipo 209 con texto vacío", () => {
+    expect(
+      codigos(base({ tipoRegistro: 4, tipoComprobante: 209, especificarTipoDocumento: "   " })),
+    ).toContain("V-020");
+  });
+
+  it("pasa para tipo 210 (Otros ingresos) con texto informado", () => {
+    expect(
+      codigos(base({ tipoRegistro: 3, tipoComprobante: 210, especificarTipoDocumento: "Alquiler" })),
+    ).not.toContain("V-020");
+  });
+
+  it("falla para tipo 210 sin especificar documento", () => {
+    expect(
+      codigos(base({ tipoRegistro: 3, tipoComprobante: 210, especificarTipoDocumento: null })),
+    ).toContain("V-020");
+  });
+
+  it("no aplica para tipo 109 (Factura)", () => {
+    expect(
+      codigos(base({ tipoComprobante: 109, especificarTipoDocumento: null })),
+    ).not.toContain("V-020");
+  });
+});
+
+// ── V-021 — Número cuenta/tarjeta y banco ────────────────────────────────
+
+describe("V-021 — numeroCuentaTarjeta y bancoCoop para tipos 207 y 211", () => {
+  it("pasa para tipo 207 con ambos campos informados", () => {
+    const errs = codigos(
+      base({ tipoRegistro: 4, tipoComprobante: 207, numeroCuentaTarjeta: "1234567890", bancoCoop: "Banco Continental" }),
+    );
+    expect(errs).not.toContain("V-021");
+  });
+
+  it("falla para tipo 207 sin número de cuenta", () => {
+    expect(
+      codigos(base({ tipoRegistro: 4, tipoComprobante: 207, numeroCuentaTarjeta: null, bancoCoop: "Banco Continental" })),
+    ).toContain("V-021");
+  });
+
+  it("falla para tipo 207 sin banco", () => {
+    expect(
+      codigos(base({ tipoRegistro: 4, tipoComprobante: 207, numeroCuentaTarjeta: "1234567890", bancoCoop: null })),
+    ).toContain("V-021");
+  });
+
+  it("produce dos errores V-021 si faltan ambos campos", () => {
+    const errs = validarComprobante(
+      base({ tipoRegistro: 4, tipoComprobante: 207, numeroCuentaTarjeta: null, bancoCoop: null }),
+    );
+    expect(errs.filter((e) => e.codigo === "V-021").length).toBe(2);
+  });
+
+  it("pasa para tipo 211 con ambos campos informados", () => {
+    expect(
+      codigos(base({ tipoRegistro: 4, tipoComprobante: 211, numeroCuentaTarjeta: "0987654321", bancoCoop: "Cooperativa" })),
+    ).not.toContain("V-021");
+  });
+
+  it("falla para tipo 211 con banco vacío", () => {
+    expect(
+      codigos(base({ tipoRegistro: 4, tipoComprobante: 211, numeroCuentaTarjeta: "0987654321", bancoCoop: "" })),
+    ).toContain("V-021");
+  });
+
+  it("no aplica para tipo 109 (Factura)", () => {
+    expect(
+      codigos(base({ tipoComprobante: 109, numeroCuentaTarjeta: null, bancoCoop: null })),
+    ).not.toContain("V-021");
+  });
+});
+
+// ── V-022 — Identificador del empleador ──────────────────────────────────
+
+describe("V-022 — identificadorEmpleador para tipo 206 (Extracto IPS)", () => {
+  it("pasa para tipo 206 con identificador informado", () => {
+    expect(
+      codigos(base({ tipoRegistro: 4, tipoComprobante: 206, fechaPeriodo: "06/2024", identificadorEmpleador: "123456" })),
+    ).not.toContain("V-022");
+  });
+
+  it("falla para tipo 206 sin identificador del empleador", () => {
+    expect(
+      codigos(base({ tipoRegistro: 4, tipoComprobante: 206, fechaPeriodo: "06/2024", identificadorEmpleador: null })),
+    ).toContain("V-022");
+  });
+
+  it("falla para tipo 206 con identificador vacío", () => {
+    expect(
+      codigos(base({ tipoRegistro: 4, tipoComprobante: 206, fechaPeriodo: "06/2024", identificadorEmpleador: "  " })),
+    ).toContain("V-022");
+  });
+
+  it("no aplica para tipo 109 (Factura)", () => {
+    expect(
+      codigos(base({ tipoComprobante: 109, identificadorEmpleador: null })),
+    ).not.toContain("V-022");
+  });
+
+  it("no aplica para tipo 208 (Liquidación salario)", () => {
+    expect(
+      codigos(base({ tipoRegistro: 3, tipoComprobante: 208, fechaPeriodo: "06/2024", identificadorEmpleador: null })),
+    ).not.toContain("V-022");
+  });
+});
+
 // ── K-001 — Baja confianza ────────────────────────────────────────────────
 
 describe("K-001 — Campo crítico baja confianza", () => {
