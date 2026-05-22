@@ -113,6 +113,13 @@ export default async function ComprobanteDetallePage(props: { params: Promise<{ 
     noImputa: comprobante.noImputa,
     comprobanteAsociadoNumero: comprobante.comprobanteAsociadoNumero,
     comprobanteAsociadoTimbrado: comprobante.comprobanteAsociadoTimbrado,
+    // Campos opcionales según tipo (V-007, V-009, V-020, V-021, V-022)
+    operacionMonedaExtranjera: comprobante.operacionMonedaExtranjera,
+    periodo: comprobante.periodo,
+    especificarTipoDocumento: comprobante.especificarTipoDocumento,
+    numeroCuenta: comprobante.numeroCuenta,
+    banco: comprobante.banco,
+    identificadorEmpleadorIps: comprobante.identificadorEmpleadorIps,
   };
 
   return (

@@ -32,6 +32,13 @@ export interface FormData {
   noImputa: "S" | "N";
   comprobanteAsociadoNumero?: string;
   comprobanteAsociadoTimbrado?: string;
+  // Campos opcionales según tipo de comprobante
+  operacionMonedaExtranjera?: "S" | "N";
+  periodo?: string;                 // MM/AAAA — tipos 206/208
+  especificarTipoDocumento?: string; // tipos 209/210
+  numeroCuenta?: string;            // tipos 207/211
+  banco?: string;                   // tipos 207/211
+  identificadorEmpleadorIps?: string; // tipo 206
 }
 
 export type ActionResult = { ok: boolean; errors?: ErrorValidacion[]; usoCola?: boolean };
@@ -90,6 +97,13 @@ export async function guardarCampos(comprobanteId: string, data: FormData): Prom
     noImputa: data.noImputa,
     comprobanteAsociadoNumero: data.comprobanteAsociadoNumero || null,
     comprobanteAsociadoTimbrado: data.comprobanteAsociadoTimbrado || null,
+    // Campos opcionales según tipo
+    operacionMonedaExtranjera: data.operacionMonedaExtranjera ?? "N",
+    periodo: data.periodo || null,
+    especificarTipoDocumento: data.especificarTipoDocumento || null,
+    numeroCuenta: data.numeroCuenta || null,
+    banco: data.banco || null,
+    identificadorEmpleadorIps: data.identificadorEmpleadorIps || null,
     estado: "EN_REVISION" as const,
   };
 

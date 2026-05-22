@@ -92,6 +92,13 @@ interface FormRevisionProps {
     noImputa: string;
     comprobanteAsociadoNumero: string | null;
     comprobanteAsociadoTimbrado: string | null;
+    // Campos opcionales según tipo
+    operacionMonedaExtranjera: string | null;
+    periodo: string | null;
+    especificarTipoDocumento: string | null;
+    numeroCuenta: string | null;
+    banco: string | null;
+    identificadorEmpleadorIps: string | null;
   };
   campos: CampoData[];
   readOnly?: boolean;
@@ -138,6 +145,15 @@ export function FormRevision({
           (formData.get("comprobanteAsociadoNumero") as string) || undefined,
         comprobanteAsociadoTimbrado:
           (formData.get("comprobanteAsociadoTimbrado") as string) || undefined,
+        operacionMonedaExtranjera:
+          formData.get("operacionMonedaExtranjera") === "S" ? "S" : "N",
+        periodo: (formData.get("periodo") as string) || undefined,
+        especificarTipoDocumento:
+          (formData.get("especificarTipoDocumento") as string) || undefined,
+        numeroCuenta: (formData.get("numeroCuenta") as string) || undefined,
+        banco: (formData.get("banco") as string) || undefined,
+        identificadorEmpleadorIps:
+          (formData.get("identificadorEmpleadorIps") as string) || undefined,
       };
       return guardarCampos(comprobanteId, data);
     },
@@ -152,7 +168,14 @@ export function FormRevision({
   );
 
   const [clientError, setClientError] = useState<string | null>(null);
+  const [tipoActual, setTipoActual] = useState<number>(initial.tipoComprobante || 109);
   const formRef = useRef<HTMLFormElement>(null);
+
+  // Visibilidad condicional según tipo (matchea V-007/V-020/V-021/V-022)
+  const muestraPeriodo = tipoActual === 206 || tipoActual === 208;
+  const muestraEspecificarTipoDoc = tipoActual === 209 || tipoActual === 210;
+  const muestraCuentaBanco = tipoActual === 207 || tipoActual === 211;
+  const muestraEmpleadorIps = tipoActual === 206;
 
   function validateForm(): string | null {
     if (!formRef.current) return null;
@@ -280,6 +303,7 @@ export function FormRevision({
                 name="tipoComprobante"
                 defaultValue={initial.tipoComprobante || 109}
                 disabled={readOnly}
+                onChange={(e) => setTipoActual(parseInt(e.target.value, 10) || 0)}
                 className={inputCls}
               >
                 <option value={0}>— Pendiente —</option>
@@ -550,6 +574,114 @@ export function FormRevision({
                 className={inputMonoCls}
               />
             </div>
+          </div>
+        </section>
+
+        {/* Grupo 6: Datos adicionales */}
+        <section className={sectionCls}>
+          <h3 className="mb-1 text-base font-semibold text-gray-900">Datos adicionales</h3>
+          <p className="mb-4 text-xs text-gray-500">
+            Algunos campos solo aparecen según el tipo de comprobante seleccionado.
+          </p>
+          <div className="grid grid-cols-2 gap-4">
+            {/* V-009 — moneda extranjera (siempre visible) */}
+            <div className="col-span-2">
+              <label className="flex items-center gap-2.5 text-sm font-medium text-gray-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="operacionMonedaExtranjera"
+                  value="S"
+                  defaultChecked={initial.operacionMonedaExtranjera === "S"}
+                  disabled={readOnly}
+                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                Operación en moneda extranjera
+              </label>
+            </div>
+
+            {/* V-007 — período MM/AAAA (tipos 206/208) */}
+            {muestraPeriodo && (
+              <div className="col-span-2">
+                <label className={labelCls}>Período (MM/AAAA)</label>
+                <input
+                  type="text"
+                  name="periodo"
+                  defaultValue={initial.periodo ?? ""}
+                  disabled={readOnly}
+                  placeholder="06/2024"
+                  pattern="\d{2}/\d{4}"
+                  className={inputMonoCls}
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  Obligatorio para Liquidación de Salario (208) y Extracto IPS (206).
+                </p>
+              </div>
+            )}
+
+            {/* V-020 — especificar tipo documento (tipos 209/210) */}
+            {muestraEspecificarTipoDoc && (
+              <div className="col-span-2">
+                <label className={labelCls}>Especificar tipo de documento</label>
+                <input
+                  type="text"
+                  name="especificarTipoDocumento"
+                  defaultValue={initial.especificarTipoDocumento ?? ""}
+                  disabled={readOnly}
+                  placeholder="Ej.: Recibo de honorarios, Alquiler…"
+                  maxLength={50}
+                  className={inputCls}
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  Obligatorio para Otros comprobantes de ingresos/egresos.
+                </p>
+              </div>
+            )}
+
+            {/* V-021 — número de cuenta y banco (tipos 207/211) */}
+            {muestraCuentaBanco && (
+              <>
+                <div>
+                  <label className={labelCls}>Número de cuenta/tarjeta</label>
+                  <input
+                    type="text"
+                    name="numeroCuenta"
+                    defaultValue={initial.numeroCuenta ?? ""}
+                    disabled={readOnly}
+                    className={inputMonoCls}
+                  />
+                </div>
+                <div>
+                  <label className={labelCls}>Banco / Financiera / Cooperativa</label>
+                  <input
+                    type="text"
+                    name="banco"
+                    defaultValue={initial.banco ?? ""}
+                    disabled={readOnly}
+                    className={inputCls}
+                  />
+                </div>
+                <p className="col-span-2 text-xs text-gray-500">
+                  Ambos obligatorios para Extracto TC/TD (207) y Transferencias (211).
+                </p>
+              </>
+            )}
+
+            {/* V-022 — identificador empleador IPS (tipo 206) */}
+            {muestraEmpleadorIps && (
+              <div className="col-span-2">
+                <label className={labelCls}>Identificador del empleador (IPS)</label>
+                <input
+                  type="text"
+                  name="identificadorEmpleadorIps"
+                  defaultValue={initial.identificadorEmpleadorIps ?? ""}
+                  disabled={readOnly}
+                  className={inputMonoCls}
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  Obligatorio para Extracto de Cuenta IPS (206).
+                </p>
+              </div>
+            )}
           </div>
         </section>
 
