@@ -42,7 +42,7 @@ export function ClienteForm({
           minLength={2}
           maxLength={200}
           defaultValue={defaults?.razonSocial ?? ""}
-          className="mt-1 w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="mt-1 w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
         />
       </div>
 
@@ -57,7 +57,7 @@ export function ClienteForm({
           required
           defaultValue={defaults?.ruc ?? ""}
           placeholder="80012345-7 o sólo 80012345"
-          className="mt-1 w-full rounded-lg border border-gray-300 px-3.5 py-2.5 font-mono text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="mt-1 w-full rounded-lg border border-gray-300 px-3.5 py-2.5 font-mono text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
         />
         <p className="mt-1 text-xs text-gray-500">
           Podés ingresar con DV (`80012345-7`) o sin DV (`80012345`); el sistema calcula y valida.
@@ -71,7 +71,10 @@ export function ClienteForm({
         </p>
         <div className="mt-2 flex flex-wrap gap-3">
           {(Object.keys(REGIMEN_LABELS) as Regimen[]).map((r) => (
-            <label key={r} className="flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer">
+            <label
+              key={r}
+              className="flex cursor-pointer items-center gap-2 text-sm font-medium text-gray-700"
+            >
               <input
                 type="checkbox"
                 name="regimen"
@@ -86,7 +89,9 @@ export function ClienteForm({
       </fieldset>
 
       {state && !state.ok && (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{state.error}</p>
+        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          {state.error}
+        </p>
       )}
       {state && state.ok && (
         <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
@@ -98,7 +103,7 @@ export function ClienteForm({
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors shadow-sm disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500 disabled:opacity-50"
         >
           {pending ? "Guardando…" : submitLabel}
         </button>

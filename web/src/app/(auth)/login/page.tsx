@@ -7,7 +7,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen">
       {/* Left — brand panel */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-slate-900 p-12">
+      <div className="hidden flex-col justify-between bg-slate-900 p-12 lg:flex lg:w-1/2">
         <div className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500 text-sm font-bold text-white">
             T
@@ -17,12 +17,11 @@ export default function LoginPage() {
 
         <div>
           <blockquote className="space-y-3">
-            <p className="text-xl font-medium text-white leading-relaxed">
-              Pre-captura, validación y exportación de comprobantes contables para el Sistema Marangatu.
+            <p className="text-xl leading-relaxed font-medium text-white">
+              Pre-captura, validación y exportación de comprobantes contables para el Sistema
+              Marangatu.
             </p>
-            <footer className="text-sm text-slate-400">
-              SET / DNIT · Paraguay
-            </footer>
+            <footer className="text-sm text-slate-400">SET / DNIT · Paraguay</footer>
           </blockquote>
         </div>
 
@@ -46,9 +45,7 @@ export default function LoginPage() {
           </div>
 
           <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Iniciar sesión</h1>
-          <p className="mt-1.5 text-sm text-gray-500">
-            Ingresá tus credenciales para acceder.
-          </p>
+          <p className="mt-1.5 text-sm text-gray-500">Ingresá tus credenciales para acceder.</p>
 
           <LoginForm />
 
@@ -67,7 +64,13 @@ export default function LoginPage() {
 function Feature({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-2.5">
-      <svg className="h-4 w-4 shrink-0 text-indigo-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+      <svg
+        className="h-4 w-4 shrink-0 text-indigo-400"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={2}
+        stroke="currentColor"
+      >
         <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
       </svg>
       <span className="text-sm text-slate-300">{label}</span>

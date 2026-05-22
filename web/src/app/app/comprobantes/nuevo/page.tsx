@@ -31,7 +31,7 @@ export default async function NuevoComprobantePage() {
       <div className="flex items-center gap-3">
         <Link
           href="/app/comprobantes"
-          className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+          className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
           aria-label="Volver"
         >
           <svg
@@ -49,7 +49,9 @@ export default async function NuevoComprobantePage() {
           </svg>
         </Link>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Cargar comprobante</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+            Cargar comprobante
+          </h1>
           <p className="mt-0.5 text-sm text-gray-500">
             Cliente:{" "}
             <strong>
@@ -60,9 +62,9 @@ export default async function NuevoComprobantePage() {
       </div>
 
       {/* Panel de carga */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-        <h2 className="text-base font-semibold text-gray-900 mb-1">Seleccioná los archivos</h2>
-        <p className="text-sm text-gray-500 mb-5">
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <h2 className="mb-1 text-base font-semibold text-gray-900">Seleccioná los archivos</h2>
+        <p className="mb-5 text-sm text-gray-500">
           PDF, imagen o XML. Podés arrastrar varios archivos a la vez.
         </p>
         {/* Zona de carga */}
@@ -70,7 +72,7 @@ export default async function NuevoComprobantePage() {
       </div>
 
       {/* Info */}
-      <div className="rounded-lg bg-blue-50 border border-blue-100 px-4 py-3 text-xs text-blue-700">
+      <div className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-xs text-blue-700">
         <strong>¿Qué pasa después de cargar?</strong> Tavex registra el archivo, detecta duplicados
         automáticamente y lo pone en cola para extracción con Gemini (activo en Fase 2). Podés
         revisar y corregir los datos extraídos antes de registrarlos definitivamente.

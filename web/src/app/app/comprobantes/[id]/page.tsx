@@ -174,9 +174,7 @@ export default async function ComprobanteDetallePage(props: { params: Promise<{ 
               <p>Confianza: {comprobante.confianzaGeneral}%</p>
             )}
           </div>
-          {estado !== "REGISTRADO" && (
-            <EliminarComprobanteButton comprobanteId={comprobante.id} />
-          )}
+          {estado !== "REGISTRADO" && <EliminarComprobanteButton comprobanteId={comprobante.id} />}
         </div>
       </div>
 

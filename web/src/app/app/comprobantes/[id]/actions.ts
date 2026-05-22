@@ -34,10 +34,10 @@ export interface FormData {
   comprobanteAsociadoTimbrado?: string;
   // Campos opcionales según tipo de comprobante
   operacionMonedaExtranjera?: "S" | "N";
-  periodo?: string;                 // MM/AAAA — tipos 206/208
+  periodo?: string; // MM/AAAA — tipos 206/208
   especificarTipoDocumento?: string; // tipos 209/210
-  numeroCuenta?: string;            // tipos 207/211
-  banco?: string;                   // tipos 207/211
+  numeroCuenta?: string; // tipos 207/211
+  banco?: string; // tipos 207/211
   identificadorEmpleadorIps?: string; // tipo 206
 }
 
@@ -345,7 +345,9 @@ export async function reextraerComprobante(comprobanteId: string): Promise<Actio
       const msg = err instanceof Error ? err.message : String(err);
       return {
         ok: false,
-        errors: [{ codigo: "GEMINI_ERR", mensaje: `Error Gemini: ${msg}`, severidad: "BLOQ" as const }],
+        errors: [
+          { codigo: "GEMINI_ERR", mensaje: `Error Gemini: ${msg}`, severidad: "BLOQ" as const },
+        ],
       };
     }
   }
@@ -382,7 +384,9 @@ export async function eliminarComprobante(comprobanteId: string): Promise<Action
   // Delete campos and the comprobante (archivo stays in R2 — not deleted to preserve audit trail)
   await prisma.$transaction([
     prisma.campoExtraido.deleteMany({ where: { comprobanteId } }),
-    prisma.auditoriaCambio.deleteMany({ where: { idEntidad: comprobanteId, entidad: "comprobante" } }),
+    prisma.auditoriaCambio.deleteMany({
+      where: { idEntidad: comprobanteId, entidad: "comprobante" },
+    }),
     prisma.comprobante.delete({ where: { id: comprobanteId } }),
   ]);
 

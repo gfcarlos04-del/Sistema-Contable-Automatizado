@@ -145,11 +145,9 @@ export function FormRevision({
           (formData.get("comprobanteAsociadoNumero") as string) || undefined,
         comprobanteAsociadoTimbrado:
           (formData.get("comprobanteAsociadoTimbrado") as string) || undefined,
-        operacionMonedaExtranjera:
-          formData.get("operacionMonedaExtranjera") === "S" ? "S" : "N",
+        operacionMonedaExtranjera: formData.get("operacionMonedaExtranjera") === "S" ? "S" : "N",
         periodo: (formData.get("periodo") as string) || undefined,
-        especificarTipoDocumento:
-          (formData.get("especificarTipoDocumento") as string) || undefined,
+        especificarTipoDocumento: (formData.get("especificarTipoDocumento") as string) || undefined,
         numeroCuenta: (formData.get("numeroCuenta") as string) || undefined,
         banco: (formData.get("banco") as string) || undefined,
         identificadorEmpleadorIps:
@@ -221,7 +219,8 @@ export function FormRevision({
   const bloqueantes = allErrors.filter((e) => e.severidad === "BLOQ");
   const advertencias = allErrors.filter((e) => e.severidad === "ADV");
 
-  const inputCls = "mt-1 w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:bg-gray-50 disabled:text-gray-500";
+  const inputCls =
+    "mt-1 w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:bg-gray-50 disabled:text-gray-500";
   const inputMonoCls = `${inputCls} font-mono`;
   const labelCls = "block text-sm font-medium text-gray-700";
   const sectionCls = "bg-white rounded-xl border border-gray-200 shadow-sm p-5";
@@ -534,7 +533,10 @@ export function FormRevision({
               { name: "imputaIrpRsp", label: "Imputa IRP-RSP", initial: initial.imputaIrpRsp },
               { name: "noImputa", label: "No Imputa", initial: initial.noImputa },
             ].map((item) => (
-              <label key={item.name} className="flex items-center gap-2.5 text-sm font-medium text-gray-700 cursor-pointer">
+              <label
+                key={item.name}
+                className="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-gray-700"
+              >
                 <input
                   type="checkbox"
                   name={item.name}
@@ -552,7 +554,9 @@ export function FormRevision({
         {/* Grupo 5: Comprobante asociado */}
         <section className={sectionCls}>
           <h3 className="mb-1 text-base font-semibold text-gray-900">Comprobante asociado</h3>
-          <p className="mb-4 text-xs text-gray-500">Completar solo si es Nota de Crédito o Débito.</p>
+          <p className="mb-4 text-xs text-gray-500">
+            Completar solo si es Nota de Crédito o Débito.
+          </p>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>Número asociado</label>
@@ -586,7 +590,7 @@ export function FormRevision({
           <div className="grid grid-cols-2 gap-4">
             {/* V-009 — moneda extranjera (siempre visible) */}
             <div className="col-span-2">
-              <label className="flex items-center gap-2.5 text-sm font-medium text-gray-700 cursor-pointer">
+              <label className="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-gray-700">
                 <input
                   type="checkbox"
                   name="operacionMonedaExtranjera"
@@ -691,7 +695,7 @@ export function FormRevision({
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
             >
               {saving ? "Guardando…" : "Guardar cambios"}
             </button>
@@ -701,7 +705,7 @@ export function FormRevision({
 
       {/* Approve / Reject / Re-extract — separate forms */}
       {!readOnly && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <h3 className="mb-4 text-base font-semibold text-gray-900">Acciones</h3>
           <div className="flex flex-wrap items-center gap-3">
             <form
@@ -719,7 +723,7 @@ export function FormRevision({
               <button
                 type="submit"
                 disabled={approving}
-                className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors shadow-sm disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500 disabled:opacity-50"
               >
                 {approving ? "Aprobando…" : "Aprobar y registrar"}
               </button>
@@ -731,13 +735,13 @@ export function FormRevision({
                 placeholder="Motivo del rechazo…"
                 value={rejectMotivo}
                 onChange={(e) => setRejectMotivo(e.target.value)}
-                className="rounded-lg border border-gray-300 px-3.5 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className="rounded-lg border border-gray-300 px-3.5 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
               />
               <form action={rejectAction}>
                 <button
                   type="submit"
                   disabled={rejecting}
-                  className="rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors disabled:opacity-50"
+                  className="rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
                 >
                   {rejecting ? "Rechazando…" : "Rechazar"}
                 </button>
@@ -748,7 +752,7 @@ export function FormRevision({
               <button
                 type="submit"
                 disabled={reextracting}
-                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
               >
                 {reextracting ? "Re-enviando…" : "Re-extraer con Gemini"}
               </button>
@@ -759,7 +763,9 @@ export function FormRevision({
                 Re-extracción encolada. Refrescá en unos segundos.
               </span>
             )}
-            {rejectResult?.ok && <span className="text-sm text-red-600">Comprobante rechazado.</span>}
+            {rejectResult?.ok && (
+              <span className="text-sm text-red-600">Comprobante rechazado.</span>
+            )}
           </div>
         </div>
       )}

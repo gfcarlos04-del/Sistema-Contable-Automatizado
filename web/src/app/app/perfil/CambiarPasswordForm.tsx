@@ -27,7 +27,7 @@ export function CambiarPasswordForm() {
     <form ref={formRef} action={dispatch} className="space-y-4">
       {/* Current password */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="passwordActual">
+        <label className="mb-1.5 block text-sm font-medium text-gray-700" htmlFor="passwordActual">
           Contraseña actual
         </label>
         <input
@@ -36,14 +36,14 @@ export function CambiarPasswordForm() {
           type="password"
           autoComplete="current-password"
           required
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           placeholder="••••••••"
         />
       </div>
 
       {/* New password */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="passwordNuevo">
+        <label className="mb-1.5 block text-sm font-medium text-gray-700" htmlFor="passwordNuevo">
           Nueva contraseña
         </label>
         <input
@@ -53,14 +53,17 @@ export function CambiarPasswordForm() {
           autoComplete="new-password"
           required
           minLength={8}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           placeholder="Mínimo 8 caracteres"
         />
       </div>
 
       {/* Confirm new password */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="passwordConfirmar">
+        <label
+          className="mb-1.5 block text-sm font-medium text-gray-700"
+          htmlFor="passwordConfirmar"
+        >
           Confirmar nueva contraseña
         </label>
         <input
@@ -70,7 +73,7 @@ export function CambiarPasswordForm() {
           autoComplete="new-password"
           required
           minLength={8}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           placeholder="Repetí la nueva contraseña"
         />
       </div>
@@ -78,8 +81,18 @@ export function CambiarPasswordForm() {
       {/* Error message */}
       {state && !state.ok && state.error && (
         <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700">
-          <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+          <svg
+            className="h-4 w-4 shrink-0"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
+            />
           </svg>
           {state.error}
         </div>
@@ -88,8 +101,18 @@ export function CambiarPasswordForm() {
       {/* Success message */}
       {state?.ok && state.success && (
         <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm text-emerald-700">
-          <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg
+            className="h-4 w-4 shrink-0"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
           Contraseña actualizada correctamente.
         </div>
@@ -99,7 +122,7 @@ export function CambiarPasswordForm() {
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         >
           {pending ? "Guardando…" : "Cambiar contraseña"}
         </button>

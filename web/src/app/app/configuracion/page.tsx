@@ -34,13 +34,15 @@ export default async function ConfiguracionPage() {
       </div>
 
       {/* Estado del sistema */}
-      <section className="rounded-xl border border-gray-200 bg-white shadow-sm p-6">
+      <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         <h2 className="text-base font-semibold text-gray-900">Estado del sistema</h2>
         <div className="mt-4 divide-y divide-gray-100">
           <div className="flex items-center justify-between py-3">
             <div>
               <p className="text-sm font-medium text-gray-700">API Key de Gemini</p>
-              <p className="text-xs text-gray-500">Necesaria para la extracción automática de datos</p>
+              <p className="text-xs text-gray-500">
+                Necesaria para la extracción automática de datos
+              </p>
             </div>
             {estadoBadge(yaTieneKey, "Configurada", "No configurada")}
           </div>
@@ -61,7 +63,12 @@ export default async function ConfiguracionPage() {
             <strong>Sin Redis:</strong> podés usar Tavex igual — la extracción con Gemini se
             disparará manualmente desde la pantalla de cada comprobante. Para habilitar extracción
             automática, creá una base en{" "}
-            <a href="https://upstash.com" target="_blank" rel="noopener noreferrer" className="underline">
+            <a
+              href="https://upstash.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+            >
               Upstash
             </a>{" "}
             y cargá el secret en Fly.io:
@@ -73,7 +80,7 @@ export default async function ConfiguracionPage() {
       </section>
 
       {/* API Key Gemini */}
-      <section className="rounded-xl border border-gray-200 bg-white shadow-sm p-6">
+      <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         <h2 className="text-base font-semibold text-gray-900">API Key de Gemini</h2>
         <p className="mt-1 text-sm text-gray-600">
           Se guarda cifrada en reposo con AES-256-GCM. Nunca llega al frontend.

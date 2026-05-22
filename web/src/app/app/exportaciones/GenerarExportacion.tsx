@@ -37,10 +37,7 @@ export function GenerarExportacion({ clienteId, clienteNombre }: GenerarExportac
     setLoading(true);
     setResult(null);
     try {
-      const body =
-        modo === "mensual"
-          ? { clienteId, periodo }
-          : { clienteId, anio };
+      const body = modo === "mensual" ? { clienteId, periodo } : { clienteId, anio };
 
       const res = await fetch("/api/exportaciones/generar", {
         method: "POST",

@@ -14,7 +14,8 @@ export type ActionResult = { ok: true } | { ok: false; error: string };
 async function requireAdminSession() {
   const session = await auth();
   if (!session?.user) return { error: "No autenticado." as const, session: null };
-  if (session.user.rol !== "ADMIN") return { error: "Solo el Admin puede gestionar usuarios." as const, session: null };
+  if (session.user.rol !== "ADMIN")
+    return { error: "Solo el Admin puede gestionar usuarios." as const, session: null };
   return { error: null, session };
 }
 
@@ -36,9 +37,12 @@ export async function crearUsuario(data: {
   const password = data.password;
   const rol = data.rol;
 
-  if (!nombre || nombre.length < 2) return { ok: false, error: "El nombre debe tener al menos 2 caracteres." };
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: "Email inválido." };
-  if (!password || password.length < 8) return { ok: false, error: "La contraseña debe tener al menos 8 caracteres." };
+  if (!nombre || nombre.length < 2)
+    return { ok: false, error: "El nombre debe tener al menos 2 caracteres." };
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    return { ok: false, error: "Email inválido." };
+  if (!password || password.length < 8)
+    return { ok: false, error: "La contraseña debe tener al menos 8 caracteres." };
   if (rol !== "ADMIN" && rol !== "OPERADOR") return { ok: false, error: "Rol inválido." };
 
   const existente = await prisma.usuario.findUnique({

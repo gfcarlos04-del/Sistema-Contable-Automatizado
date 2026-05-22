@@ -24,9 +24,12 @@ export function NuevoUsuarioForm() {
   return (
     <div className="mt-8">
       <h2 className="text-lg font-semibold tracking-tight">Nuevo usuario</h2>
-      <form action={formAction} className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <form
+        action={formAction}
+        className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5"
+      >
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1" htmlFor="nombre">
+          <label className="mb-1 block text-xs font-medium text-gray-700" htmlFor="nombre">
             Nombre
           </label>
           <input
@@ -41,7 +44,7 @@ export function NuevoUsuarioForm() {
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1" htmlFor="email">
+          <label className="mb-1 block text-xs font-medium text-gray-700" htmlFor="email">
             Email
           </label>
           <input
@@ -55,7 +58,7 @@ export function NuevoUsuarioForm() {
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1" htmlFor="password">
+          <label className="mb-1 block text-xs font-medium text-gray-700" htmlFor="password">
             Contraseña
           </label>
           <input
@@ -71,7 +74,7 @@ export function NuevoUsuarioForm() {
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1" htmlFor="rol">
+          <label className="mb-1 block text-xs font-medium text-gray-700" htmlFor="rol">
             Rol
           </label>
           <select

@@ -80,7 +80,7 @@ export default async function ExportacionesPage() {
         </p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
+      <div className="space-y-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         <h2 className="text-base font-semibold text-gray-900">Generar exportación</h2>
         <GenerarExportacion
           clienteId={clienteActivo.id}
@@ -129,12 +129,14 @@ export default async function ExportacionesPage() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {exportacionesConUrl.map((e) => (
-                  <tr key={e.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={e.id} className="transition-colors hover:bg-gray-50">
                     <td className="px-4 py-3 text-sm text-gray-700">{e.tipo.replace("_", " ")}</td>
                     <td className="px-4 py-3 font-mono text-sm text-gray-700">
                       {formatPeriodo(e.periodo)}
                     </td>
-                    <td className="px-4 py-3 text-right text-sm text-gray-700">{e.registrosIncluidos}</td>
+                    <td className="px-4 py-3 text-right text-sm text-gray-700">
+                      {e.registrosIncluidos}
+                    </td>
                     <td className="px-4 py-3 text-sm text-gray-700">
                       {new Date(e.creadoEn).toLocaleString("es-PY")}
                     </td>
@@ -142,11 +144,21 @@ export default async function ExportacionesPage() {
                       {e.url ? (
                         <a
                           href={e.url}
-                          className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
+                          className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 transition-colors hover:text-indigo-500"
                           download
                         >
-                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                          <svg
+                            className="h-4 w-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={2}
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
+                            />
                           </svg>
                           Descargar
                         </a>

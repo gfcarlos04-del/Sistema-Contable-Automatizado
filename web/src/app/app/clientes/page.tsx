@@ -35,7 +35,7 @@ export default async function ClientesPage() {
         {esAdmin && (
           <Link
             href="/app/clientes/nuevo"
-            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500"
           >
             + Nuevo cliente
           </Link>
@@ -60,19 +60,35 @@ export default async function ClientesPage() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold tracking-wide text-gray-500 uppercase">Razón social</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold tracking-wide text-gray-500 uppercase">RUC</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold tracking-wide text-gray-500 uppercase">Régimen</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold tracking-wide text-gray-500 uppercase">Comprobantes</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold tracking-wide text-gray-500 uppercase">Estado</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                  Razón social
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                  RUC
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                  Régimen
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                  Comprobantes
+                </th>
+                <th className="px-4 py-3 text-center text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                  Estado
+                </th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {clientes.map((c) => (
-                <tr key={c.id} className={`hover:bg-gray-50 transition-colors ${c.activo ? "" : "opacity-60"}`}>
+                <tr
+                  key={c.id}
+                  className={`transition-colors hover:bg-gray-50 ${c.activo ? "" : "opacity-60"}`}
+                >
                   <td className="px-4 py-3">
-                    <Link href={`/app/clientes/${c.id}`} className="font-medium text-gray-900 hover:text-indigo-600 transition-colors">
+                    <Link
+                      href={`/app/clientes/${c.id}`}
+                      className="font-medium text-gray-900 transition-colors hover:text-indigo-600"
+                    >
                       {c.razonSocial}
                     </Link>
                   </td>
@@ -82,20 +98,27 @@ export default async function ClientesPage() {
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1">
                       {c.regimen.map((r) => (
-                        <span key={r} className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-600">
+                        <span
+                          key={r}
+                          className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600"
+                        >
                           {r.replace("_", "-")}
                         </span>
                       ))}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-right text-sm text-gray-700 tabular-nums">{c._count.comprobantes}</td>
+                  <td className="px-4 py-3 text-right text-sm text-gray-700 tabular-nums">
+                    {c._count.comprobantes}
+                  </td>
                   <td className="px-4 py-3 text-center">
                     {c.activo ? (
-                      <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-700">
+                      <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
                         Activo
                       </span>
                     ) : (
-                      <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-600">Inactivo</span>
+                      <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
+                        Inactivo
+                      </span>
                     )}
                   </td>
                   <td className="px-4 py-3 text-right">

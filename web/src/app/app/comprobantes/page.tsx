@@ -114,19 +114,19 @@ export default async function ComprobantesPage(props: {
       take: PAGE_SIZE,
       skip: (page - 1) * PAGE_SIZE,
       select: {
-      id: true,
-      estado: true,
-      tipoComprobante: true,
-      timbrado: true,
-      numero: true,
-      fechaEmision: true,
-      total: true,
-      creadoEn: true,
-      nombreContraparte: true,
-    },
-  }),
-  prisma.comprobante.count({ where }),
-]);
+        id: true,
+        estado: true,
+        tipoComprobante: true,
+        timbrado: true,
+        numero: true,
+        fechaEmision: true,
+        total: true,
+        creadoEn: true,
+        nombreContraparte: true,
+      },
+    }),
+    prisma.comprobante.count({ where }),
+  ]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const hayFiltros = !!estadoParam || !!q || !!desde || !!hasta;
@@ -158,7 +158,7 @@ export default async function ComprobantesPage(props: {
         </div>
         <Link
           href="/app/comprobantes/nuevo"
-          className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors shadow-sm"
+          className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500"
         >
           + Cargar comprobante
         </Link>
@@ -168,22 +168,19 @@ export default async function ComprobantesPage(props: {
       <form
         method="get"
         action="/app/comprobantes"
-        className="mt-6 bg-white rounded-xl border border-gray-200 shadow-sm px-5 py-4"
+        className="mt-6 rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm"
       >
         <div className="flex flex-wrap items-end gap-4">
           {/* Estado */}
           <div>
-            <label
-              htmlFor="filtro-estado"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="filtro-estado" className="block text-sm font-medium text-gray-700">
               Estado
             </label>
             <select
               id="filtro-estado"
               name="estado"
               defaultValue={estadoParam}
-              className="mt-1 rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
+              className="mt-1 rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
             >
               <option value="">Todos</option>
               <option value="CARGADO">Cargado</option>
@@ -198,10 +195,7 @@ export default async function ComprobantesPage(props: {
 
           {/* Búsqueda */}
           <div>
-            <label
-              htmlFor="filtro-q"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="filtro-q" className="block text-sm font-medium text-gray-700">
               Búsqueda
             </label>
             <input
@@ -210,16 +204,13 @@ export default async function ComprobantesPage(props: {
               type="text"
               defaultValue={q}
               placeholder="N°, timbrado, contraparte, RUC…"
-              className="mt-1 w-60 rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="mt-1 w-60 rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
             />
           </div>
 
           {/* Desde */}
           <div>
-            <label
-              htmlFor="filtro-desde"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="filtro-desde" className="block text-sm font-medium text-gray-700">
               Desde
             </label>
             <input
@@ -227,16 +218,13 @@ export default async function ComprobantesPage(props: {
               name="desde"
               type="date"
               defaultValue={desde}
-              className="mt-1 rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="mt-1 rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
             />
           </div>
 
           {/* Hasta */}
           <div>
-            <label
-              htmlFor="filtro-hasta"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="filtro-hasta" className="block text-sm font-medium text-gray-700">
               Hasta
             </label>
             <input
@@ -244,7 +232,7 @@ export default async function ComprobantesPage(props: {
               name="hasta"
               type="date"
               defaultValue={hasta}
-              className="mt-1 rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="mt-1 rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
             />
           </div>
 
@@ -252,14 +240,14 @@ export default async function ComprobantesPage(props: {
           <div className="flex gap-2">
             <button
               type="submit"
-              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors shadow-sm"
+              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500"
             >
               Filtrar
             </button>
             {hayFiltros && (
               <Link
                 href="/app/comprobantes"
-                className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
               >
                 Limpiar
               </Link>
@@ -291,7 +279,7 @@ export default async function ComprobantesPage(props: {
           {!hayFiltros && (
             <Link
               href="/app/comprobantes/nuevo"
-              className="mt-5 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors shadow-sm"
+              className="mt-5 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500"
             >
               Cargar el primero
             </Link>
@@ -336,7 +324,7 @@ export default async function ComprobantesPage(props: {
                   <td className="px-4 py-3">
                     <Link
                       href={`/app/comprobantes/${c.id}`}
-                      className="font-medium text-gray-900 hover:text-indigo-600 transition-colors"
+                      className="font-medium text-gray-900 transition-colors hover:text-indigo-600"
                     >
                       {c.timbrado && c.numero ? (
                         <span className="font-mono">
@@ -387,7 +375,7 @@ export default async function ComprobantesPage(props: {
                 {page > 1 && (
                   <Link
                     href={pageUrl(page - 1)}
-                    className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
                   >
                     ← Anterior
                   </Link>
@@ -395,7 +383,7 @@ export default async function ComprobantesPage(props: {
                 {page < totalPages && (
                   <Link
                     href={pageUrl(page + 1)}
-                    className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
                   >
                     Siguiente →
                   </Link>

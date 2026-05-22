@@ -41,7 +41,10 @@ export function DropZone({ clienteId }: { clienteId: string }) {
       const { id, file } = item;
 
       if (!MIMES_PERMITIDOS.includes(file.type)) {
-        updateStatus(id, { name: "error", message: `Tipo no permitido: ${file.type || "desconocido"}` });
+        updateStatus(id, {
+          name: "error",
+          message: `Tipo no permitido: ${file.type || "desconocido"}`,
+        });
         return;
       }
       if (file.size > MAX_BYTES) {
@@ -62,7 +65,10 @@ export function DropZone({ clienteId }: { clienteId: string }) {
           const xhr = new XMLHttpRequest();
           xhr.upload.addEventListener("progress", (e) => {
             if (e.lengthComputable) {
-              updateStatus(id, { name: "uploading", progress: Math.round((e.loaded / e.total) * 100) });
+              updateStatus(id, {
+                name: "uploading",
+                progress: Math.round((e.loaded / e.total) * 100),
+              });
             }
           });
           xhr.addEventListener("load", () => {
@@ -150,13 +156,23 @@ export function DropZone({ clienteId }: { clienteId: string }) {
   );
 
   const clearDone = () =>
-    setQueue((prev) => prev.filter((f) => f.status.name === "pending" || f.status.name === "uploading"));
+    setQueue((prev) =>
+      prev.filter((f) => f.status.name === "pending" || f.status.name === "uploading"),
+    );
 
-  const allDone = queue.length > 0 && queue.every((f) => f.status.name !== "pending" && f.status.name !== "uploading");
+  const allDone =
+    queue.length > 0 &&
+    queue.every((f) => f.status.name !== "pending" && f.status.name !== "uploading");
   const successCount = queue.filter((f) => f.status.name === "done").length;
-  const firstDoneId = queue.find((f) => f.status.name === "done")?.status.name === "done"
-    ? (queue.find((f) => f.status.name === "done")!.status as { name: "done"; comprobanteId: string }).comprobanteId
-    : null;
+  const firstDoneId =
+    queue.find((f) => f.status.name === "done")?.status.name === "done"
+      ? (
+          queue.find((f) => f.status.name === "done")!.status as {
+            name: "done";
+            comprobanteId: string;
+          }
+        ).comprobanteId
+      : null;
 
   // ── Render ─────────────────────────────────────────────────────────────
 
@@ -172,15 +188,32 @@ export function DropZone({ clienteId }: { clienteId: string }) {
             ? "border-indigo-400 bg-indigo-50"
             : "border-gray-300 bg-gray-50 hover:border-indigo-300 hover:bg-indigo-50/40"
         }`}
-        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragging(true);
+        }}
         onDragLeave={() => setDragging(false)}
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") inputRef.current?.click(); }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") inputRef.current?.click();
+        }}
       >
-        <div className={`flex h-12 w-12 items-center justify-center rounded-xl transition-colors ${dragging ? "bg-indigo-100" : "bg-gray-100"}`}>
-          <svg className={`h-6 w-6 transition-colors ${dragging ? "text-indigo-500" : "text-gray-400"}`} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+        <div
+          className={`flex h-12 w-12 items-center justify-center rounded-xl transition-colors ${dragging ? "bg-indigo-100" : "bg-gray-100"}`}
+        >
+          <svg
+            className={`h-6 w-6 transition-colors ${dragging ? "text-indigo-500" : "text-gray-400"}`}
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+            />
           </svg>
         </div>
         <div>
@@ -188,8 +221,12 @@ export function DropZone({ clienteId }: { clienteId: string }) {
             Arrastrá archivos acá, o{" "}
             <span className="text-indigo-600 underline underline-offset-2">seleccioná</span>
           </p>
-          <p className="mt-1 text-xs text-gray-500">PDF · JPG · PNG · WebP · TIFF — máx. 20 MB por archivo</p>
-          <p className="mt-0.5 text-xs font-medium text-indigo-500">Podés seleccionar varios archivos a la vez</p>
+          <p className="mt-1 text-xs text-gray-500">
+            PDF · JPG · PNG · WebP · TIFF — máx. 20 MB por archivo
+          </p>
+          <p className="mt-0.5 text-xs font-medium text-indigo-500">
+            Podés seleccionar varios archivos a la vez
+          </p>
         </div>
       </div>
 
@@ -209,16 +246,27 @@ export function DropZone({ clienteId }: { clienteId: string }) {
           {allDone && (
             <div className="flex items-center justify-between border-b border-gray-100 bg-emerald-50 px-4 py-2.5">
               <div className="flex items-center gap-2 text-sm font-medium text-emerald-700">
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
-                {successCount} {successCount === 1 ? "comprobante cargado" : "comprobantes cargados"}
+                {successCount}{" "}
+                {successCount === 1 ? "comprobante cargado" : "comprobantes cargados"}
               </div>
               <div className="flex gap-2">
                 {successCount === 1 && firstDoneId && (
                   <a
                     href={`/app/comprobantes/${firstDoneId}`}
-                    className="rounded-lg bg-indigo-600 px-3 py-1 text-xs font-semibold text-white hover:bg-indigo-500 transition-colors"
+                    className="rounded-lg bg-indigo-600 px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-indigo-500"
                   >
                     Ver comprobante
                   </a>
@@ -226,14 +274,14 @@ export function DropZone({ clienteId }: { clienteId: string }) {
                 {successCount > 1 && (
                   <a
                     href="/app/comprobantes"
-                    className="rounded-lg bg-indigo-600 px-3 py-1 text-xs font-semibold text-white hover:bg-indigo-500 transition-colors"
+                    className="rounded-lg bg-indigo-600 px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-indigo-500"
                   >
                     Ver listado
                   </a>
                 )}
                 <button
                   onClick={clearDone}
-                  className="rounded-lg border border-gray-300 bg-white px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+                  className="rounded-lg border border-gray-300 bg-white px-3 py-1 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50"
                 >
                   Cargar más
                 </button>
@@ -263,8 +311,18 @@ function FileRow({ item }: { item: FileItem }) {
     <li className="flex items-center gap-3 px-4 py-3">
       {/* File icon */}
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100">
-        <svg className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+        <svg
+          className="h-4 w-4 text-gray-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+          />
         </svg>
       </div>
 
@@ -285,18 +343,22 @@ function FileRow({ item }: { item: FileItem }) {
 
       {/* Status indicator */}
       <div className="shrink-0">
-        {status.name === "pending" && (
-          <span className="text-xs text-gray-400">En cola</span>
-        )}
+        {status.name === "pending" && <span className="text-xs text-gray-400">En cola</span>}
         {status.name === "uploading" && (
           <span className="text-xs font-medium text-indigo-600">{status.progress}%</span>
         )}
         {status.name === "done" && (
           <a
             href={`/app/comprobantes/${status.comprobanteId}`}
-            className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-100 transition-colors"
+            className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-100"
           >
-            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <svg
+              className="h-3.5 w-3.5"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
             </svg>
             Cargado
@@ -308,7 +370,10 @@ function FileRow({ item }: { item: FileItem }) {
           </span>
         )}
         {status.name === "error" && (
-          <span className="inline-flex items-center gap-1 rounded-lg bg-red-50 px-2 py-1 text-xs font-medium text-red-600" title={status.message}>
+          <span
+            className="inline-flex items-center gap-1 rounded-lg bg-red-50 px-2 py-1 text-xs font-medium text-red-600"
+            title={status.message}
+          >
             Error
           </span>
         )}

@@ -122,9 +122,7 @@ describe("V-004 — Timbrado 8 dígitos numéricos", () => {
   });
 
   it("no aplica para tipo 107", () => {
-    expect(
-      codigos(base({ tipoComprobante: 107, timbrado: "000" })),
-    ).not.toContain("V-004");
+    expect(codigos(base({ tipoComprobante: 107, timbrado: "000" }))).not.toContain("V-004");
   });
 });
 
@@ -194,7 +192,13 @@ describe("V-014 — Al menos una imputación S al registrar", () => {
   it("no bloquea si estado no es REGISTRADO", () => {
     expect(
       codigos(
-        base({ imputaIva: "N", imputaIre: "N", imputaIrpRsp: "N", noImputa: "N", estado: "EN_REVISION" }),
+        base({
+          imputaIva: "N",
+          imputaIre: "N",
+          imputaIrpRsp: "N",
+          noImputa: "N",
+          estado: "EN_REVISION",
+        }),
       ),
     ).not.toContain("V-014");
   });
@@ -205,61 +209,121 @@ describe("V-014 — Al menos una imputación S al registrar", () => {
 describe("V-016 — Régimen del cliente permite la imputación", () => {
   it("pasa si el cliente tiene IVA y se imputa IVA", () => {
     expect(
-      codigos(base({ imputaIva: "S", imputaIre: "N", imputaIrpRsp: "N", noImputa: "N", regimenCliente: ["IVA"] })),
+      codigos(
+        base({
+          imputaIva: "S",
+          imputaIre: "N",
+          imputaIrpRsp: "N",
+          noImputa: "N",
+          regimenCliente: ["IVA"],
+        }),
+      ),
     ).not.toContain("V-016");
   });
 
   it("falla si el cliente no tiene IVA pero se imputa IVA", () => {
     expect(
-      codigos(base({ imputaIva: "S", imputaIre: "N", imputaIrpRsp: "N", noImputa: "N", regimenCliente: ["IRE"] })),
+      codigos(
+        base({
+          imputaIva: "S",
+          imputaIre: "N",
+          imputaIrpRsp: "N",
+          noImputa: "N",
+          regimenCliente: ["IRE"],
+        }),
+      ),
     ).toContain("V-016");
   });
 
   it("pasa si el cliente tiene IRE y se imputa IRE", () => {
     expect(
-      codigos(base({ imputaIva: "N", imputaIre: "S", imputaIrpRsp: "N", noImputa: "N", regimenCliente: ["IVA", "IRE"] })),
+      codigos(
+        base({
+          imputaIva: "N",
+          imputaIre: "S",
+          imputaIrpRsp: "N",
+          noImputa: "N",
+          regimenCliente: ["IVA", "IRE"],
+        }),
+      ),
     ).not.toContain("V-016");
   });
 
   it("pasa si el cliente tiene IRE_SIMPLE y se imputa IRE", () => {
     expect(
-      codigos(base({ imputaIva: "N", imputaIre: "S", imputaIrpRsp: "N", noImputa: "N", regimenCliente: ["IVA", "IRE_SIMPLE"] })),
+      codigos(
+        base({
+          imputaIva: "N",
+          imputaIre: "S",
+          imputaIrpRsp: "N",
+          noImputa: "N",
+          regimenCliente: ["IVA", "IRE_SIMPLE"],
+        }),
+      ),
     ).not.toContain("V-016");
   });
 
   it("falla si el cliente no tiene IRE ni IRE_SIMPLE pero se imputa IRE", () => {
     expect(
-      codigos(base({ imputaIva: "S", imputaIre: "S", imputaIrpRsp: "N", noImputa: "N", regimenCliente: ["IVA"] })),
+      codigos(
+        base({
+          imputaIva: "S",
+          imputaIre: "S",
+          imputaIrpRsp: "N",
+          noImputa: "N",
+          regimenCliente: ["IVA"],
+        }),
+      ),
     ).toContain("V-016");
   });
 
   it("pasa si el cliente tiene IRP_RSP y se imputa IRP-RSP", () => {
     expect(
-      codigos(base({ imputaIva: "S", imputaIre: "N", imputaIrpRsp: "S", noImputa: "N", regimenCliente: ["IVA", "IRP_RSP"] })),
+      codigos(
+        base({
+          imputaIva: "S",
+          imputaIre: "N",
+          imputaIrpRsp: "S",
+          noImputa: "N",
+          regimenCliente: ["IVA", "IRP_RSP"],
+        }),
+      ),
     ).not.toContain("V-016");
   });
 
   it("falla si el cliente no tiene IRP_RSP pero se imputa IRP-RSP", () => {
     expect(
-      codigos(base({ imputaIva: "S", imputaIre: "N", imputaIrpRsp: "S", noImputa: "N", regimenCliente: ["IVA"] })),
+      codigos(
+        base({
+          imputaIva: "S",
+          imputaIre: "N",
+          imputaIrpRsp: "S",
+          noImputa: "N",
+          regimenCliente: ["IVA"],
+        }),
+      ),
     ).toContain("V-016");
   });
 
   it("no aplica si regimenCliente es null (dato no disponible)", () => {
-    expect(
-      codigos(base({ imputaIva: "S", regimenCliente: null })),
-    ).not.toContain("V-016");
+    expect(codigos(base({ imputaIva: "S", regimenCliente: null }))).not.toContain("V-016");
   });
 
   it("no aplica si regimenCliente es array vacío", () => {
-    expect(
-      codigos(base({ imputaIva: "S", regimenCliente: [] })),
-    ).not.toContain("V-016");
+    expect(codigos(base({ imputaIva: "S", regimenCliente: [] }))).not.toContain("V-016");
   });
 
   it("noImputa=S no genera V-016 aunque el régimen no coincida", () => {
     expect(
-      codigos(base({ imputaIva: "N", imputaIre: "N", imputaIrpRsp: "N", noImputa: "S", regimenCliente: ["IRE"] })),
+      codigos(
+        base({
+          imputaIva: "N",
+          imputaIre: "N",
+          imputaIrpRsp: "N",
+          noImputa: "S",
+          regimenCliente: ["IRE"],
+        }),
+      ),
     ).not.toContain("V-016");
   });
 });
@@ -341,24 +405,32 @@ describe("C-004 — Montos enteros (PYG sin decimales)", () => {
 
 describe("V-015 — noImputa=S requiere otra imputación en COMPRAS/EGRESOS", () => {
   it("no aplica en VENTAS (tipoRegistro=1)", () => {
-    expect(codigos(base({ imputaIva: "N", imputaIre: "N", imputaIrpRsp: "N", noImputa: "S" }))).not.toContain("V-015");
+    expect(
+      codigos(base({ imputaIva: "N", imputaIre: "N", imputaIrpRsp: "N", noImputa: "S" })),
+    ).not.toContain("V-015");
   });
 
   it("falla en COMPRAS si noImputa=S y todas las demás son N", () => {
     expect(
-      codigos(base({ tipoRegistro: 2, imputaIva: "N", imputaIre: "N", imputaIrpRsp: "N", noImputa: "S" })),
+      codigos(
+        base({ tipoRegistro: 2, imputaIva: "N", imputaIre: "N", imputaIrpRsp: "N", noImputa: "S" }),
+      ),
     ).toContain("V-015");
   });
 
   it("pasa en COMPRAS si noImputa=S y también imputaIva=S", () => {
     expect(
-      codigos(base({ tipoRegistro: 2, imputaIva: "S", imputaIre: "N", imputaIrpRsp: "N", noImputa: "S" })),
+      codigos(
+        base({ tipoRegistro: 2, imputaIva: "S", imputaIre: "N", imputaIrpRsp: "N", noImputa: "S" }),
+      ),
     ).not.toContain("V-015");
   });
 
   it("falla en EGRESOS si noImputa=S y todas las demás son N", () => {
     expect(
-      codigos(base({ tipoRegistro: 4, imputaIva: "N", imputaIre: "N", imputaIrpRsp: "N", noImputa: "S" })),
+      codigos(
+        base({ tipoRegistro: 4, imputaIva: "N", imputaIre: "N", imputaIrpRsp: "N", noImputa: "S" }),
+      ),
     ).toContain("V-015");
   });
 });
@@ -368,12 +440,29 @@ describe("V-015 — noImputa=S requiere otra imputación en COMPRAS/EGRESOS", ()
 describe("V-019 — tipos 101/104/105/112 en COMPRAS: gravados deben ser 0", () => {
   it("falla si gravado10 > 0 para tipo 101 en COMPRAS", () => {
     expect(
-      codigos(base({ tipoRegistro: 2, tipoComprobante: 101, montoGravado10: 500_000, iva10: 45_455, total: 500_000 })),
+      codigos(
+        base({
+          tipoRegistro: 2,
+          tipoComprobante: 101,
+          montoGravado10: 500_000,
+          iva10: 45_455,
+          total: 500_000,
+        }),
+      ),
     ).toContain("V-019");
   });
 
   it("pasa si gravado10=gravado5=exento=0 para tipo 101 en COMPRAS", () => {
-    const c = base({ tipoRegistro: 2, tipoComprobante: 101, montoGravado10: 0, iva10: 0, montoGravado5: 0, iva5: 0, exento: 0, total: 500_000 });
+    const c = base({
+      tipoRegistro: 2,
+      tipoComprobante: 101,
+      montoGravado10: 0,
+      iva10: 0,
+      montoGravado5: 0,
+      iva5: 0,
+      exento: 0,
+      total: 500_000,
+    });
     expect(codigos(c)).not.toContain("V-019");
   });
 
@@ -390,35 +479,51 @@ describe("V-019 — tipos 101/104/105/112 en COMPRAS: gravados deben ser 0", () 
 
 describe("V-007 — fechaPeriodo MM/AAAA para tipos 206 y 208", () => {
   it("pasa con formato válido y fecha ≥ 01/2021 para tipo 208", () => {
-    expect(codigos(base({ tipoRegistro: 3, tipoComprobante: 208, fechaPeriodo: "06/2024" }))).not.toContain("V-007");
+    expect(
+      codigos(base({ tipoRegistro: 3, tipoComprobante: 208, fechaPeriodo: "06/2024" })),
+    ).not.toContain("V-007");
   });
 
   it("pasa con 01/2021 (límite inferior)", () => {
-    expect(codigos(base({ tipoRegistro: 4, tipoComprobante: 206, fechaPeriodo: "01/2021" }))).not.toContain("V-007");
+    expect(
+      codigos(base({ tipoRegistro: 4, tipoComprobante: 206, fechaPeriodo: "01/2021" })),
+    ).not.toContain("V-007");
   });
 
   it("falla cuando fechaPeriodo está ausente para tipo 208", () => {
-    expect(codigos(base({ tipoRegistro: 3, tipoComprobante: 208, fechaPeriodo: null }))).toContain("V-007");
+    expect(codigos(base({ tipoRegistro: 3, tipoComprobante: 208, fechaPeriodo: null }))).toContain(
+      "V-007",
+    );
   });
 
   it("falla cuando fechaPeriodo está ausente para tipo 206", () => {
-    expect(codigos(base({ tipoRegistro: 4, tipoComprobante: 206, fechaPeriodo: null }))).toContain("V-007");
+    expect(codigos(base({ tipoRegistro: 4, tipoComprobante: 206, fechaPeriodo: null }))).toContain(
+      "V-007",
+    );
   });
 
   it("falla con formato incorrecto (dd/mm/yyyy)", () => {
-    expect(codigos(base({ tipoRegistro: 3, tipoComprobante: 208, fechaPeriodo: "15/06/2024" }))).toContain("V-007");
+    expect(
+      codigos(base({ tipoRegistro: 3, tipoComprobante: 208, fechaPeriodo: "15/06/2024" })),
+    ).toContain("V-007");
   });
 
   it("falla con año anterior a 2021", () => {
-    expect(codigos(base({ tipoRegistro: 3, tipoComprobante: 208, fechaPeriodo: "12/2020" }))).toContain("V-007");
+    expect(
+      codigos(base({ tipoRegistro: 3, tipoComprobante: 208, fechaPeriodo: "12/2020" })),
+    ).toContain("V-007");
   });
 
   it("falla con mes 00", () => {
-    expect(codigos(base({ tipoRegistro: 3, tipoComprobante: 208, fechaPeriodo: "00/2024" }))).toContain("V-007");
+    expect(
+      codigos(base({ tipoRegistro: 3, tipoComprobante: 208, fechaPeriodo: "00/2024" })),
+    ).toContain("V-007");
   });
 
   it("falla con mes 13", () => {
-    expect(codigos(base({ tipoRegistro: 3, tipoComprobante: 208, fechaPeriodo: "13/2024" }))).toContain("V-007");
+    expect(
+      codigos(base({ tipoRegistro: 3, tipoComprobante: 208, fechaPeriodo: "13/2024" })),
+    ).toContain("V-007");
   });
 
   it("no aplica para tipo 109 (Factura)", () => {
@@ -431,14 +536,16 @@ describe("V-007 — fechaPeriodo MM/AAAA para tipos 206 y 208", () => {
 
 describe("V-013 — imputaIva / imputaIre / imputaIrpRsp ∈ {S, N}", () => {
   it("pasa cuando todas son S o N", () => {
-    expect(codigos(base({ imputaIva: "S", imputaIre: "N", imputaIrpRsp: "N" }))).not.toContain("V-013");
+    expect(codigos(base({ imputaIva: "S", imputaIre: "N", imputaIrpRsp: "N" }))).not.toContain(
+      "V-013",
+    );
   });
 
   it('falla cuando imputaIva es "s" (minúscula)', () => {
     expect(codigos(base({ imputaIva: "s" }))).toContain("V-013");
   });
 
-  it('falla cuando imputaIre es cadena vacía', () => {
+  it("falla cuando imputaIre es cadena vacía", () => {
     expect(codigos(base({ imputaIre: "" }))).toContain("V-013");
   });
 
@@ -546,7 +653,17 @@ describe("V-011 — Tipo comprobante ∈ Tabla 4 y permitido para registro", () 
   });
 
   it("pasa para autofactura (101) en COMPRAS", () => {
-    expect(codigos(base({ tipoRegistro: 2, tipoComprobante: 101, montoGravado10: 0, iva10: 0, total: 500_000 }))).not.toContain("V-011");
+    expect(
+      codigos(
+        base({
+          tipoRegistro: 2,
+          tipoComprobante: 101,
+          montoGravado10: 0,
+          iva10: 0,
+          total: 500_000,
+        }),
+      ),
+    ).not.toContain("V-011");
   });
 
   it("falla para autofactura (101) en VENTAS", () => {
@@ -554,7 +671,16 @@ describe("V-011 — Tipo comprobante ∈ Tabla 4 y permitido para registro", () 
   });
 
   it("pasa para comprobante ingreso a crédito (203) en INGRESOS", () => {
-    expect(codigos(base({ tipoRegistro: 3, tipoComprobante: 203, comprobanteAsociadoNumero: "001-001-0000001", comprobanteAsociadoTimbrado: "12345678" }))).not.toContain("V-011");
+    expect(
+      codigos(
+        base({
+          tipoRegistro: 3,
+          tipoComprobante: 203,
+          comprobanteAsociadoNumero: "001-001-0000001",
+          comprobanteAsociadoTimbrado: "12345678",
+        }),
+      ),
+    ).not.toContain("V-011");
   });
 
   it("falla para factura (109) en EGRESOS", () => {
@@ -575,7 +701,13 @@ describe("V-011 — Tipo comprobante ∈ Tabla 4 y permitido para registro", () 
 describe("V-020 — especificarTipoDocumento para tipos 209 y 210", () => {
   it("pasa para tipo 209 (Otros egresos) con texto informado", () => {
     expect(
-      codigos(base({ tipoRegistro: 4, tipoComprobante: 209, especificarTipoDocumento: "Recibo honorarios" })),
+      codigos(
+        base({
+          tipoRegistro: 4,
+          tipoComprobante: 209,
+          especificarTipoDocumento: "Recibo honorarios",
+        }),
+      ),
     ).not.toContain("V-020");
   });
 
@@ -593,7 +725,9 @@ describe("V-020 — especificarTipoDocumento para tipos 209 y 210", () => {
 
   it("pasa para tipo 210 (Otros ingresos) con texto informado", () => {
     expect(
-      codigos(base({ tipoRegistro: 3, tipoComprobante: 210, especificarTipoDocumento: "Alquiler" })),
+      codigos(
+        base({ tipoRegistro: 3, tipoComprobante: 210, especificarTipoDocumento: "Alquiler" }),
+      ),
     ).not.toContain("V-020");
   });
 
@@ -604,9 +738,9 @@ describe("V-020 — especificarTipoDocumento para tipos 209 y 210", () => {
   });
 
   it("no aplica para tipo 109 (Factura)", () => {
-    expect(
-      codigos(base({ tipoComprobante: 109, especificarTipoDocumento: null })),
-    ).not.toContain("V-020");
+    expect(codigos(base({ tipoComprobante: 109, especificarTipoDocumento: null }))).not.toContain(
+      "V-020",
+    );
   });
 });
 
@@ -615,20 +749,39 @@ describe("V-020 — especificarTipoDocumento para tipos 209 y 210", () => {
 describe("V-021 — numeroCuentaTarjeta y bancoCoop para tipos 207 y 211", () => {
   it("pasa para tipo 207 con ambos campos informados", () => {
     const errs = codigos(
-      base({ tipoRegistro: 4, tipoComprobante: 207, numeroCuentaTarjeta: "1234567890", bancoCoop: "Banco Continental" }),
+      base({
+        tipoRegistro: 4,
+        tipoComprobante: 207,
+        numeroCuentaTarjeta: "1234567890",
+        bancoCoop: "Banco Continental",
+      }),
     );
     expect(errs).not.toContain("V-021");
   });
 
   it("falla para tipo 207 sin número de cuenta", () => {
     expect(
-      codigos(base({ tipoRegistro: 4, tipoComprobante: 207, numeroCuentaTarjeta: null, bancoCoop: "Banco Continental" })),
+      codigos(
+        base({
+          tipoRegistro: 4,
+          tipoComprobante: 207,
+          numeroCuentaTarjeta: null,
+          bancoCoop: "Banco Continental",
+        }),
+      ),
     ).toContain("V-021");
   });
 
   it("falla para tipo 207 sin banco", () => {
     expect(
-      codigos(base({ tipoRegistro: 4, tipoComprobante: 207, numeroCuentaTarjeta: "1234567890", bancoCoop: null })),
+      codigos(
+        base({
+          tipoRegistro: 4,
+          tipoComprobante: 207,
+          numeroCuentaTarjeta: "1234567890",
+          bancoCoop: null,
+        }),
+      ),
     ).toContain("V-021");
   });
 
@@ -641,13 +794,27 @@ describe("V-021 — numeroCuentaTarjeta y bancoCoop para tipos 207 y 211", () =>
 
   it("pasa para tipo 211 con ambos campos informados", () => {
     expect(
-      codigos(base({ tipoRegistro: 4, tipoComprobante: 211, numeroCuentaTarjeta: "0987654321", bancoCoop: "Cooperativa" })),
+      codigos(
+        base({
+          tipoRegistro: 4,
+          tipoComprobante: 211,
+          numeroCuentaTarjeta: "0987654321",
+          bancoCoop: "Cooperativa",
+        }),
+      ),
     ).not.toContain("V-021");
   });
 
   it("falla para tipo 211 con banco vacío", () => {
     expect(
-      codigos(base({ tipoRegistro: 4, tipoComprobante: 211, numeroCuentaTarjeta: "0987654321", bancoCoop: "" })),
+      codigos(
+        base({
+          tipoRegistro: 4,
+          tipoComprobante: 211,
+          numeroCuentaTarjeta: "0987654321",
+          bancoCoop: "",
+        }),
+      ),
     ).toContain("V-021");
   });
 
@@ -663,31 +830,59 @@ describe("V-021 — numeroCuentaTarjeta y bancoCoop para tipos 207 y 211", () =>
 describe("V-022 — identificadorEmpleador para tipo 206 (Extracto IPS)", () => {
   it("pasa para tipo 206 con identificador informado", () => {
     expect(
-      codigos(base({ tipoRegistro: 4, tipoComprobante: 206, fechaPeriodo: "06/2024", identificadorEmpleador: "123456" })),
+      codigos(
+        base({
+          tipoRegistro: 4,
+          tipoComprobante: 206,
+          fechaPeriodo: "06/2024",
+          identificadorEmpleador: "123456",
+        }),
+      ),
     ).not.toContain("V-022");
   });
 
   it("falla para tipo 206 sin identificador del empleador", () => {
     expect(
-      codigos(base({ tipoRegistro: 4, tipoComprobante: 206, fechaPeriodo: "06/2024", identificadorEmpleador: null })),
+      codigos(
+        base({
+          tipoRegistro: 4,
+          tipoComprobante: 206,
+          fechaPeriodo: "06/2024",
+          identificadorEmpleador: null,
+        }),
+      ),
     ).toContain("V-022");
   });
 
   it("falla para tipo 206 con identificador vacío", () => {
     expect(
-      codigos(base({ tipoRegistro: 4, tipoComprobante: 206, fechaPeriodo: "06/2024", identificadorEmpleador: "  " })),
+      codigos(
+        base({
+          tipoRegistro: 4,
+          tipoComprobante: 206,
+          fechaPeriodo: "06/2024",
+          identificadorEmpleador: "  ",
+        }),
+      ),
     ).toContain("V-022");
   });
 
   it("no aplica para tipo 109 (Factura)", () => {
-    expect(
-      codigos(base({ tipoComprobante: 109, identificadorEmpleador: null })),
-    ).not.toContain("V-022");
+    expect(codigos(base({ tipoComprobante: 109, identificadorEmpleador: null }))).not.toContain(
+      "V-022",
+    );
   });
 
   it("no aplica para tipo 208 (Liquidación salario)", () => {
     expect(
-      codigos(base({ tipoRegistro: 3, tipoComprobante: 208, fechaPeriodo: "06/2024", identificadorEmpleador: null })),
+      codigos(
+        base({
+          tipoRegistro: 3,
+          tipoComprobante: 208,
+          fechaPeriodo: "06/2024",
+          identificadorEmpleador: null,
+        }),
+      ),
     ).not.toContain("V-022");
   });
 });
@@ -696,7 +891,9 @@ describe("V-022 — identificadorEmpleador para tipo 206 (Extracto IPS)", () => 
 
 describe("K-001 — Campo crítico baja confianza", () => {
   it("no genera error si no hay campos con baja confianza", () => {
-    expect(codigos(base({ campos: [{ campo: "timbrado", confianza: 95, status: "OK" }] }))).not.toContain("K-001");
+    expect(
+      codigos(base({ campos: [{ campo: "timbrado", confianza: 95, status: "OK" }] })),
+    ).not.toContain("K-001");
   });
 
   it("genera K-001 si campo crítico tiene confianza < 70", () => {

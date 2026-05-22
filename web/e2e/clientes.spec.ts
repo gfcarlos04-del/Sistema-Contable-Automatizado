@@ -13,9 +13,7 @@ test.describe("Lista de clientes", () => {
   });
 
   test("muestra un enlace para crear nuevo cliente", async ({ page }) => {
-    await expect(
-      page.getByRole("link", { name: /nuevo cliente/i }),
-    ).toBeVisible();
+    await expect(page.getByRole("link", { name: /nuevo cliente/i })).toBeVisible();
   });
 });
 
@@ -35,9 +33,7 @@ test.describe("Formulario de nuevo cliente", () => {
   });
 
   test("muestra el botón 'Crear cliente'", async ({ page }) => {
-    await expect(
-      page.getByRole("button", { name: /crear cliente/i }),
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: /crear cliente/i })).toBeVisible();
   });
 
   test("el campo razón social es required (HTML5 lo previene)", async ({ page }) => {

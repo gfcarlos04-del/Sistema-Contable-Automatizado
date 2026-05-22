@@ -25,10 +25,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (!periodo && anio === undefined) {
-    return NextResponse.json(
-      { error: "Se requiere periodo (MM/YYYY) o anio" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "Se requiere periodo (MM/YYYY) o anio" }, { status: 400 });
   }
 
   // Verify cliente belongs to org
@@ -47,7 +44,10 @@ export async function POST(req: NextRequest) {
   // ── Caso anual ─────────────────────────────────────────────────────────────
   if (anio !== undefined) {
     if (!Number.isInteger(anio) || anio < 2000 || anio > 2099) {
-      return NextResponse.json({ error: "anio debe ser un año válido (2000-2099)" }, { status: 400 });
+      return NextResponse.json(
+        { error: "anio debe ser un año válido (2000-2099)" },
+        { status: 400 },
+      );
     }
 
     const periodoStart = new Date(`${anio}-01-01`);

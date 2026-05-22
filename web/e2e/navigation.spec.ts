@@ -18,23 +18,35 @@ test.describe("Navegación autenticada", () => {
 
   test("navega a /app/clientes haciendo click en el sidebar", async ({ page }) => {
     // En el sidebar puede haber múltiples elementos con "Clientes"; uso el link
-    await page.getByRole("link", { name: /^clientes/i }).first().click();
+    await page
+      .getByRole("link", { name: /^clientes/i })
+      .first()
+      .click();
     await page.waitForURL(/\/app\/clientes/);
     await expect(page).toHaveURL(/\/app\/clientes/);
   });
 
   test("navega a /app/comprobantes desde el sidebar", async ({ page }) => {
-    await page.getByRole("link", { name: /^comprobantes/i }).first().click();
+    await page
+      .getByRole("link", { name: /^comprobantes/i })
+      .first()
+      .click();
     await page.waitForURL(/\/app\/comprobantes/);
   });
 
   test("navega a /app/exportaciones desde el sidebar", async ({ page }) => {
-    await page.getByRole("link", { name: /^exportaciones/i }).first().click();
+    await page
+      .getByRole("link", { name: /^exportaciones/i })
+      .first()
+      .click();
     await page.waitForURL(/\/app\/exportaciones/);
   });
 
   test("navega a /app/auditoria desde el sidebar", async ({ page }) => {
-    await page.getByRole("link", { name: /auditor/i }).first().click();
+    await page
+      .getByRole("link", { name: /auditor/i })
+      .first()
+      .click();
     await page.waitForURL(/\/app\/auditoria/);
   });
 
@@ -46,7 +58,10 @@ test.describe("Navegación autenticada", () => {
   });
 
   test("navega a /app/configuracion desde el sidebar", async ({ page }) => {
-    await page.getByRole("link", { name: /configuraci/i }).first().click();
+    await page
+      .getByRole("link", { name: /configuraci/i })
+      .first()
+      .click();
     await page.waitForURL(/\/app\/configuracion/);
   });
 

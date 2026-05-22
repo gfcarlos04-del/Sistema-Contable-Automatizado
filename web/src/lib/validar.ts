@@ -45,9 +45,9 @@ export interface ComprobanteParaValidar {
   fechaPeriodo?: string | null; // MM/AAAA — para tipos 208 y 206
   regimenCliente?: string[] | null; // IVA | IRE | IRE_SIMPLE | IRP_RSP
   especificarTipoDocumento?: string | null; // V-020 — tipos 209/210
-  numeroCuentaTarjeta?: string | null;      // V-021 — tipos 207/211
-  bancoCoop?: string | null;                // V-021 — tipos 207/211
-  identificadorEmpleador?: string | null;   // V-022 — tipo 206
+  numeroCuentaTarjeta?: string | null; // V-021 — tipos 207/211
+  bancoCoop?: string | null; // V-021 — tipos 207/211
+  identificadorEmpleador?: string | null; // V-022 — tipo 206
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -202,11 +202,7 @@ export function validarComprobante(c: ComprobanteParaValidar): ErrorValidacion[]
         const mes = mm;
         const MIN_ANIO = 2021;
         const MIN_MES = 1;
-        if (
-          mes < 1 || mes > 12 ||
-          anio < MIN_ANIO ||
-          (anio === MIN_ANIO && mes < MIN_MES)
-        ) {
+        if (mes < 1 || mes > 12 || anio < MIN_ANIO || (anio === MIN_ANIO && mes < MIN_MES)) {
           errors.push({
             codigo: "V-007",
             mensaje: `La fecha de período debe ser ≥ 01/2021 y tener un mes válido (01–12). Valor recibido: "${c.fechaPeriodo}".`,
@@ -327,7 +323,8 @@ export function validarComprobante(c: ComprobanteParaValidar): ErrorValidacion[]
   if (!nombreEsOpcional && !c.nombreContraparte) {
     errors.push({
       codigo: "V-012",
-      mensaje: "El nombre/razón social de la contraparte es obligatorio para este tipo de identificación.",
+      mensaje:
+        "El nombre/razón social de la contraparte es obligatorio para este tipo de identificación.",
       severidad: "BLOQ",
       campo: "nombreContraparte",
     });
@@ -339,7 +336,8 @@ export function validarComprobante(c: ComprobanteParaValidar): ErrorValidacion[]
     if (!tieneOtra) {
       errors.push({
         codigo: "V-015",
-        mensaje: "Si se marca 'No imputa', debe seleccionarse al menos otra imputación (IVA, IRE o IRP-RSP).",
+        mensaje:
+          "Si se marca 'No imputa', debe seleccionarse al menos otra imputación (IVA, IRE o IRP-RSP).",
         severidad: "BLOQ",
       });
     }
@@ -380,7 +378,8 @@ export function validarComprobante(c: ComprobanteParaValidar): ErrorValidacion[]
     if (gravado10 !== 0 || gravado5 !== 0 || exento !== 0) {
       errors.push({
         codigo: "V-019",
-        mensaje: "Para este tipo de comprobante en Compras, los montos gravados y exento deben ser 0 (solo el total es informativo).",
+        mensaje:
+          "Para este tipo de comprobante en Compras, los montos gravados y exento deben ser 0 (solo el total es informativo).",
         severidad: "BLOQ",
       });
     }
@@ -400,7 +399,8 @@ export function validarComprobante(c: ComprobanteParaValidar): ErrorValidacion[]
     if (!c.comprobanteAsociadoTimbrado) {
       errors.push({
         codigo: "V-017",
-        mensaje: "El timbrado del comprobante asociado es obligatorio para notas de crédito/débito.",
+        mensaje:
+          "El timbrado del comprobante asociado es obligatorio para notas de crédito/débito.",
         severidad: "BLOQ",
         campo: "comprobanteAsociadoTimbrado",
       });
@@ -412,7 +412,8 @@ export function validarComprobante(c: ComprobanteParaValidar): ErrorValidacion[]
     if (!c.especificarTipoDocumento || c.especificarTipoDocumento.trim() === "") {
       errors.push({
         codigo: "V-020",
-        mensaje: "Para este tipo de comprobante es obligatorio especificar el tipo de documento (texto libre).",
+        mensaje:
+          "Para este tipo de comprobante es obligatorio especificar el tipo de documento (texto libre).",
         severidad: "BLOQ",
         campo: "especificarTipoDocumento",
       });
@@ -444,7 +445,8 @@ export function validarComprobante(c: ComprobanteParaValidar): ErrorValidacion[]
     if (!c.identificadorEmpleador || c.identificadorEmpleador.trim() === "") {
       errors.push({
         codigo: "V-022",
-        mensaje: "El identificador del empleador (IPS) es obligatorio para el Extracto de Cuenta IPS.",
+        mensaje:
+          "El identificador del empleador (IPS) es obligatorio para el Extracto de Cuenta IPS.",
         severidad: "BLOQ",
         campo: "identificadorEmpleador",
       });

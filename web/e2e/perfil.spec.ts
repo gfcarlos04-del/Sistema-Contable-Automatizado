@@ -17,9 +17,7 @@ test.describe("Página de perfil", () => {
   });
 
   test("muestra la sección de cambio de contraseña", async ({ page }) => {
-    await expect(
-      page.getByRole("heading", { name: /cambiar contraseña/i }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: /cambiar contraseña/i })).toBeVisible();
   });
 
   test("el formulario tiene los tres campos requeridos", async ({ page }) => {
@@ -30,41 +28,49 @@ test.describe("Página de perfil", () => {
 
   test("muestra error si la contraseña actual es incorrecta", async ({ page }) => {
     await page.getByLabel(/contraseña actual/i).fill("wrongpassword123");
-    await page.getByLabel(/nueva contraseña/i).first().fill("newpassword456");
+    await page
+      .getByLabel(/nueva contraseña/i)
+      .first()
+      .fill("newpassword456");
     await page.getByLabel(/confirmar nueva contraseña/i).fill("newpassword456");
     await page.getByRole("button", { name: /cambiar contraseña/i }).click();
 
-    await expect(
-      page.getByText(/contraseña actual es incorrecta/i),
-    ).toBeVisible({ timeout: 8_000 });
+    await expect(page.getByText(/contraseña actual es incorrecta/i)).toBeVisible({
+      timeout: 8_000,
+    });
   });
 
   test("muestra error si las contraseñas nuevas no coinciden", async ({ page }) => {
     await page.getByLabel(/contraseña actual/i).fill("somepassword");
-    await page.getByLabel(/nueva contraseña/i).first().fill("newpassword456");
+    await page
+      .getByLabel(/nueva contraseña/i)
+      .first()
+      .fill("newpassword456");
     await page.getByLabel(/confirmar nueva contraseña/i).fill("differentpassword");
     await page.getByRole("button", { name: /cambiar contraseña/i }).click();
 
-    await expect(
-      page.getByText(/no coinciden/i),
-    ).toBeVisible({ timeout: 8_000 });
+    await expect(page.getByText(/no coinciden/i)).toBeVisible({ timeout: 8_000 });
   });
 
   test("muestra error si la nueva contraseña es igual a la actual", async ({ page }) => {
     const pwd = "samepassword1";
     await page.getByLabel(/contraseña actual/i).fill(pwd);
-    await page.getByLabel(/nueva contraseña/i).first().fill(pwd);
+    await page
+      .getByLabel(/nueva contraseña/i)
+      .first()
+      .fill(pwd);
     await page.getByLabel(/confirmar nueva contraseña/i).fill(pwd);
     await page.getByRole("button", { name: /cambiar contraseña/i }).click();
 
-    await expect(
-      page.getByText(/diferente a la actual/i),
-    ).toBeVisible({ timeout: 8_000 });
+    await expect(page.getByText(/diferente a la actual/i)).toBeVisible({ timeout: 8_000 });
   });
 
   test("el botón muestra 'Guardando…' mientras procesa", async ({ page }) => {
     await page.getByLabel(/contraseña actual/i).fill("somepassword1");
-    await page.getByLabel(/nueva contraseña/i).first().fill("otherpassword2");
+    await page
+      .getByLabel(/nueva contraseña/i)
+      .first()
+      .fill("otherpassword2");
     await page.getByLabel(/confirmar nueva contraseña/i).fill("otherpassword2");
 
     // Intercept the server action to add latency

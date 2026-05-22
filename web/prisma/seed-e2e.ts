@@ -33,9 +33,7 @@ if (!DATABASE_URL) {
 const PROD_HINTS = ["prod", "production", "live"];
 const urlLower = DATABASE_URL.toLowerCase();
 if (PROD_HINTS.some((h) => urlLower.includes(h))) {
-  console.error(
-    `❌ DATABASE_URL parece apuntar a producción (${urlLower}). Abortando seed E2E.`,
-  );
+  console.error(`❌ DATABASE_URL parece apuntar a producción (${urlLower}). Abortando seed E2E.`);
   console.error("   Usá una DB de test o exportá ALLOW_E2E_SEED_IN_PROD=1 (no recomendado).");
   if (process.env.ALLOW_E2E_SEED_IN_PROD !== "1") {
     process.exit(1);

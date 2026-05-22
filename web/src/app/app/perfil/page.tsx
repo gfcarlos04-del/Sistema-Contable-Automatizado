@@ -35,13 +35,13 @@ export default async function PerfilPage() {
           </div>
           <div className="px-5 py-5">
             {/* Avatar */}
-            <div className="flex items-center gap-4 mb-6">
+            <div className="mb-6 flex items-center gap-4">
               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-lg font-semibold text-white">
                 {initials}
               </div>
               <div className="min-w-0">
-                <p className="font-semibold text-gray-900 truncate">{nombre}</p>
-                <p className="text-sm text-gray-500 truncate">{email}</p>
+                <p className="truncate font-semibold text-gray-900">{nombre}</p>
+                <p className="truncate text-sm text-gray-500">{email}</p>
               </div>
             </div>
 
@@ -49,11 +49,11 @@ export default async function PerfilPage() {
             <dl className="space-y-3 text-sm">
               <div className="flex justify-between gap-2">
                 <dt className="text-gray-500">Nombre</dt>
-                <dd className="font-medium text-gray-900 text-right">{nombre}</dd>
+                <dd className="text-right font-medium text-gray-900">{nombre}</dd>
               </div>
               <div className="flex justify-between gap-2">
                 <dt className="text-gray-500">Email</dt>
-                <dd className="font-medium text-gray-900 text-right truncate">{email}</dd>
+                <dd className="truncate text-right font-medium text-gray-900">{email}</dd>
               </div>
               <div className="flex justify-between gap-2">
                 <dt className="text-gray-500">Rol</dt>
@@ -85,7 +85,7 @@ export default async function PerfilPage() {
               Usá una contraseña segura de al menos 8 caracteres.
             </p>
           </div>
-          <div className="px-5 py-5 max-w-sm">
+          <div className="max-w-sm px-5 py-5">
             <CambiarPasswordForm />
           </div>
         </div>

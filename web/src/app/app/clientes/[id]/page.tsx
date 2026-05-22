@@ -35,20 +35,27 @@ export default async function ClienteDetallePage(props: { params: Promise<{ id: 
   return (
     <div className="max-w-xl space-y-6">
       <div>
-        <Link href="/app/clientes" className="text-xs font-medium text-gray-500 hover:text-indigo-600 transition-colors">
+        <Link
+          href="/app/clientes"
+          className="text-xs font-medium text-gray-500 transition-colors hover:text-indigo-600"
+        >
           ← Volver a clientes
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">{cliente.razonSocial}</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">
+          {cliente.razonSocial}
+        </h1>
         <p className="mt-1 font-mono text-sm text-gray-500">
           RUC {cliente.ruc}-{cliente.dv}
           {!cliente.activo && (
-            <span className="ml-3 rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-600">Inactivo</span>
+            <span className="ml-3 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
+              Inactivo
+            </span>
           )}
         </p>
       </div>
 
       {esAdmin ? (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
           <ClienteForm
             action={editarBound}
             submitLabel="Guardar cambios"

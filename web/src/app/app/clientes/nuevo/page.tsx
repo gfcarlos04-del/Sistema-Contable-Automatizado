@@ -13,13 +13,16 @@ export default async function NuevoClientePage() {
   return (
     <div className="max-w-xl space-y-6">
       <div>
-        <Link href="/app/clientes" className="text-xs font-medium text-gray-500 hover:text-indigo-600 transition-colors">
+        <Link
+          href="/app/clientes"
+          className="text-xs font-medium text-gray-500 transition-colors hover:text-indigo-600"
+        >
           ← Volver a clientes
         </Link>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-900">Nuevo cliente</h1>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         <ClienteForm action={crearClienteAction} submitLabel="Crear cliente" />
       </div>
     </div>
