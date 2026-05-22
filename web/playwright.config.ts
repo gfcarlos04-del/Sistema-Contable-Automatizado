@@ -34,6 +34,7 @@ export default defineConfig({
     // Main test project: reuses saved auth state
     {
       name: "chromium",
+      testIgnore: /.*\.noauth\.spec\.ts/,
       use: {
         ...devices["Desktop Chrome"],
         storageState: "e2e/.auth/user.json",

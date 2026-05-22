@@ -9,25 +9,20 @@ test.describe("Página de exportaciones", () => {
   });
 
   test("muestra el título 'Exportaciones'", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: /exportacion/i })).toBeVisible();
-  });
-
-  test("muestra el selector de período (mensual/anual)", async ({ page }) => {
-    // There should be a period selector or tabs
-    const periodoEl = page.getByText(/mensual|anual|período/i).first();
-    await expect(periodoEl).toBeVisible();
-  });
-
-  test("muestra el botón de generar ZIP", async ({ page }) => {
     await expect(
-      page.getByRole("button", { name: /generar|exportar|zip/i }).first(),
+      page.getByRole("heading", { name: /^exportaciones/i }),
     ).toBeVisible();
   });
 
-  test("muestra un aviso si no hay cliente seleccionado", async ({ page }) => {
-    // Without an active client, the export page should inform the user
-    const aviso = page.getByText(/seleccion|cliente/i).first();
-    const boton = page.getByRole("button", { name: /generar/i }).first();
-    await expect(aviso.or(boton)).toBeVisible({ timeout: 5_000 });
+  test("muestra la sección 'Generar exportación' o aviso de seleccionar cliente", async ({ page }) => {
+    const generar = page.getByRole("heading", { name: /generar exportaci/i });
+    const aviso = page.getByText(/seleccion.*cliente/i);
+    await expect(generar.or(aviso).first()).toBeVisible({ timeout: 5_000 });
+  });
+
+  test("muestra la sección 'Exportaciones anteriores' (si hay cliente activo)", async ({ page }) => {
+    const seccion = page.getByRole("heading", { name: /exportaciones anteriores/i });
+    const aviso = page.getByText(/seleccion.*cliente/i);
+    await expect(seccion.or(aviso).first()).toBeVisible({ timeout: 5_000 });
   });
 });

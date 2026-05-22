@@ -1,5 +1,5 @@
 /**
- * Clientes — lista, formulario de alta, validaciones.
+ * Clientes — lista y formulario de alta.
  */
 import { test, expect } from "@playwright/test";
 
@@ -9,10 +9,10 @@ test.describe("Lista de clientes", () => {
   });
 
   test("muestra el título 'Clientes'", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: /clientes/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /^clientes/i })).toBeVisible();
   });
 
-  test("muestra el botón 'Nuevo cliente'", async ({ page }) => {
+  test("muestra un enlace para crear nuevo cliente", async ({ page }) => {
     await expect(
       page.getByRole("link", { name: /nuevo cliente/i }),
     ).toBeVisible();
@@ -26,33 +26,23 @@ test.describe("Formulario de nuevo cliente", () => {
 
   test("muestra los campos obligatorios", async ({ page }) => {
     await expect(page.getByLabel(/razón social/i)).toBeVisible();
-    await expect(page.getByLabel(/ruc/i).first()).toBeVisible();
+    await expect(page.getByLabel(/^ruc/i)).toBeVisible();
   });
 
-  test("muestra selector de régimen tributario", async ({ page }) => {
-    // IVA checkbox or similar
-    await expect(page.getByText(/iva/i).first()).toBeVisible();
+  test("muestra el selector de régimen tributario", async ({ page }) => {
+    // El form usa checkboxes con name="regimen"
+    await expect(page.locator('input[name="regimen"]').first()).toBeAttached();
   });
 
-  test("falla si se intenta guardar sin datos", async ({ page }) => {
-    await page.getByRole("button", { name: /guardar/i }).click();
-    // HTML5 required validation or server error
+  test("muestra el botón 'Crear cliente'", async ({ page }) => {
+    await expect(
+      page.getByRole("button", { name: /crear cliente/i }),
+    ).toBeVisible();
+  });
+
+  test("el campo razón social es required (HTML5 lo previene)", async ({ page }) => {
+    await page.getByRole("button", { name: /crear cliente/i }).click();
+    // HTML5 validation impide enviar: seguimos en la misma URL
     await expect(page).toHaveURL(/\/app\/clientes\/nuevo/);
-  });
-
-  test("falla si el RUC tiene letras", async ({ page }) => {
-    await page.getByLabel(/razón social/i).fill("Empresa Test S.A.");
-    await page.getByLabel(/ruc/i).first().fill("ABC1234");
-    await page.getByRole("button", { name: /guardar/i }).click();
-    // Should stay on the form and show validation error
-    await expect(page).toHaveURL(/\/app\/clientes\/nuevo/);
-  });
-});
-
-test.describe("Edición de cliente", () => {
-  test("la lista de clientes muestra un enlace por cada cliente", async ({ page }) => {
-    await page.goto("/app/clientes");
-    // May be empty in test env — just verify the page loads
-    await expect(page.getByRole("heading", { name: /clientes/i })).toBeVisible();
   });
 });

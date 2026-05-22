@@ -20,7 +20,7 @@ setup("authenticate", async ({ page }) => {
 
   await page.getByLabel(/email/i).fill(EMAIL);
   await page.getByLabel(/contraseña/i).fill(PASSWORD);
-  await page.getByRole("button", { name: /iniciar sesión/i }).click();
+  await page.getByRole("button", { name: /^entrar/i }).click();
 
   // Wait for redirect to dashboard
   await page.waitForURL("/app", { timeout: 15_000 });

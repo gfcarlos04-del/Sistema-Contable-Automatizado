@@ -17,7 +17,9 @@ test.describe("Página de perfil", () => {
   });
 
   test("muestra la sección de cambio de contraseña", async ({ page }) => {
-    await expect(page.getByText(/cambiar contraseña/i)).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /cambiar contraseña/i }),
+    ).toBeVisible();
   });
 
   test("el formulario tiene los tres campos requeridos", async ({ page }) => {
