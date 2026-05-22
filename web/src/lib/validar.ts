@@ -43,6 +43,7 @@ export interface ComprobanteParaValidar {
   condicionOperacion?: number | null;
   operacionMonedaExtranjera?: string | null;
   fechaPeriodo?: string | null; // MM/AAAA — para tipos 208 y 206
+  regimenCliente?: string[] | null; // IVA | IRE | IRE_SIMPLE | IRP_RSP
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -336,6 +337,36 @@ export function validarComprobante(c: ComprobanteParaValidar): ErrorValidacion[]
         codigo: "V-015",
         mensaje: "Si se marca 'No imputa', debe seleccionarse al menos otra imputación (IVA, IRE o IRP-RSP).",
         severidad: "BLOQ",
+      });
+    }
+  }
+
+  // V-016: Régimen del cliente permite la imputación elegida — BLOQ
+  // Solo aplica si regimenCliente está informado (no null/undefined)
+  if (c.regimenCliente != null && c.regimenCliente.length > 0) {
+    const reg = c.regimenCliente;
+    if (c.imputaIva === "S" && !reg.includes("IVA")) {
+      errors.push({
+        codigo: "V-016",
+        mensaje: "El cliente no está inscripto en IVA. No puede imputarse al IVA.",
+        severidad: "BLOQ",
+        campo: "imputaIva",
+      });
+    }
+    if (c.imputaIre === "S" && !reg.includes("IRE") && !reg.includes("IRE_SIMPLE")) {
+      errors.push({
+        codigo: "V-016",
+        mensaje: "El cliente no está inscripto en IRE ni IRE Simple. No puede imputarse al IRE.",
+        severidad: "BLOQ",
+        campo: "imputaIre",
+      });
+    }
+    if (c.imputaIrpRsp === "S" && !reg.includes("IRP_RSP")) {
+      errors.push({
+        codigo: "V-016",
+        mensaje: "El cliente no está inscripto en IRP-RSP. No puede imputarse al IRP-RSP.",
+        severidad: "BLOQ",
+        campo: "imputaIrpRsp",
       });
     }
   }

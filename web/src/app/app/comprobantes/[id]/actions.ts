@@ -49,6 +49,7 @@ async function getComprobanteOwned(comprobanteId: string, organizacionId: string
     where: { id: comprobanteId, organizacionId },
     include: {
       campos: { select: { campo: true, confianza: true, status: true } },
+      cliente: { select: { regimen: true } },
     },
   });
   return c;
@@ -195,6 +196,7 @@ export async function aprobarComprobante(comprobanteId: string): Promise<ActionR
     comprobanteAsociadoTimbrado: comprobante.comprobanteAsociadoTimbrado,
     nombreContraparte: comprobante.nombreContraparte,
     tipoIdentificacionContraparte: comprobante.tipoIdentificacionContraparte,
+    regimenCliente: comprobante.cliente?.regimen ?? null,
   });
 
   const bloqueantes = errors.filter((e) => e.severidad === "BLOQ");

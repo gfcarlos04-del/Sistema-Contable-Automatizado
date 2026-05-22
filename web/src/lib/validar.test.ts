@@ -200,6 +200,70 @@ describe("V-014 — Al menos una imputación S al registrar", () => {
   });
 });
 
+// ── V-016 — Régimen del cliente ───────────────────────────────────────────
+
+describe("V-016 — Régimen del cliente permite la imputación", () => {
+  it("pasa si el cliente tiene IVA y se imputa IVA", () => {
+    expect(
+      codigos(base({ imputaIva: "S", imputaIre: "N", imputaIrpRsp: "N", noImputa: "N", regimenCliente: ["IVA"] })),
+    ).not.toContain("V-016");
+  });
+
+  it("falla si el cliente no tiene IVA pero se imputa IVA", () => {
+    expect(
+      codigos(base({ imputaIva: "S", imputaIre: "N", imputaIrpRsp: "N", noImputa: "N", regimenCliente: ["IRE"] })),
+    ).toContain("V-016");
+  });
+
+  it("pasa si el cliente tiene IRE y se imputa IRE", () => {
+    expect(
+      codigos(base({ imputaIva: "N", imputaIre: "S", imputaIrpRsp: "N", noImputa: "N", regimenCliente: ["IVA", "IRE"] })),
+    ).not.toContain("V-016");
+  });
+
+  it("pasa si el cliente tiene IRE_SIMPLE y se imputa IRE", () => {
+    expect(
+      codigos(base({ imputaIva: "N", imputaIre: "S", imputaIrpRsp: "N", noImputa: "N", regimenCliente: ["IVA", "IRE_SIMPLE"] })),
+    ).not.toContain("V-016");
+  });
+
+  it("falla si el cliente no tiene IRE ni IRE_SIMPLE pero se imputa IRE", () => {
+    expect(
+      codigos(base({ imputaIva: "S", imputaIre: "S", imputaIrpRsp: "N", noImputa: "N", regimenCliente: ["IVA"] })),
+    ).toContain("V-016");
+  });
+
+  it("pasa si el cliente tiene IRP_RSP y se imputa IRP-RSP", () => {
+    expect(
+      codigos(base({ imputaIva: "S", imputaIre: "N", imputaIrpRsp: "S", noImputa: "N", regimenCliente: ["IVA", "IRP_RSP"] })),
+    ).not.toContain("V-016");
+  });
+
+  it("falla si el cliente no tiene IRP_RSP pero se imputa IRP-RSP", () => {
+    expect(
+      codigos(base({ imputaIva: "S", imputaIre: "N", imputaIrpRsp: "S", noImputa: "N", regimenCliente: ["IVA"] })),
+    ).toContain("V-016");
+  });
+
+  it("no aplica si regimenCliente es null (dato no disponible)", () => {
+    expect(
+      codigos(base({ imputaIva: "S", regimenCliente: null })),
+    ).not.toContain("V-016");
+  });
+
+  it("no aplica si regimenCliente es array vacío", () => {
+    expect(
+      codigos(base({ imputaIva: "S", regimenCliente: [] })),
+    ).not.toContain("V-016");
+  });
+
+  it("noImputa=S no genera V-016 aunque el régimen no coincida", () => {
+    expect(
+      codigos(base({ imputaIva: "N", imputaIre: "N", imputaIrpRsp: "N", noImputa: "S", regimenCliente: ["IRE"] })),
+    ).not.toContain("V-016");
+  });
+});
+
 // ── V-017 — Comprobante asociado para NC/ND ───────────────────────────────
 
 describe("V-017 — Comprobante asociado para NC/ND", () => {
