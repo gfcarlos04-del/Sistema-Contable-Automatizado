@@ -197,6 +197,15 @@ export async function aprobarComprobante(comprobanteId: string): Promise<ActionR
     nombreContraparte: comprobante.nombreContraparte,
     tipoIdentificacionContraparte: comprobante.tipoIdentificacionContraparte,
     regimenCliente: comprobante.cliente?.regimen ?? null,
+    // V-007 / V-008 / V-009
+    fechaPeriodo: comprobante.periodo ?? null,
+    condicionOperacion: comprobante.condicionOperacion ?? null,
+    operacionMonedaExtranjera: comprobante.operacionMonedaExtranjera ?? null,
+    // V-020 / V-021 / V-022
+    especificarTipoDocumento: comprobante.especificarTipoDocumento ?? null,
+    numeroCuentaTarjeta: comprobante.numeroCuenta ?? null,
+    bancoCoop: comprobante.banco ?? null,
+    identificadorEmpleador: comprobante.identificadorEmpleadorIps ?? null,
   });
 
   const bloqueantes = errors.filter((e) => e.severidad === "BLOQ");
