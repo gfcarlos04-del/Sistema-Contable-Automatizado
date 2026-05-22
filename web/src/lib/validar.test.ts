@@ -322,6 +322,73 @@ describe("V-019 — tipos 101/104/105/112 en COMPRAS: gravados deben ser 0", () 
   });
 });
 
+// ── V-007 — Fecha período MM/AAAA ────────────────────────────────────────
+
+describe("V-007 — fechaPeriodo MM/AAAA para tipos 206 y 208", () => {
+  it("pasa con formato válido y fecha ≥ 01/2021 para tipo 208", () => {
+    expect(codigos(base({ tipoRegistro: 3, tipoComprobante: 208, fechaPeriodo: "06/2024" }))).not.toContain("V-007");
+  });
+
+  it("pasa con 01/2021 (límite inferior)", () => {
+    expect(codigos(base({ tipoRegistro: 4, tipoComprobante: 206, fechaPeriodo: "01/2021" }))).not.toContain("V-007");
+  });
+
+  it("falla cuando fechaPeriodo está ausente para tipo 208", () => {
+    expect(codigos(base({ tipoRegistro: 3, tipoComprobante: 208, fechaPeriodo: null }))).toContain("V-007");
+  });
+
+  it("falla cuando fechaPeriodo está ausente para tipo 206", () => {
+    expect(codigos(base({ tipoRegistro: 4, tipoComprobante: 206, fechaPeriodo: null }))).toContain("V-007");
+  });
+
+  it("falla con formato incorrecto (dd/mm/yyyy)", () => {
+    expect(codigos(base({ tipoRegistro: 3, tipoComprobante: 208, fechaPeriodo: "15/06/2024" }))).toContain("V-007");
+  });
+
+  it("falla con año anterior a 2021", () => {
+    expect(codigos(base({ tipoRegistro: 3, tipoComprobante: 208, fechaPeriodo: "12/2020" }))).toContain("V-007");
+  });
+
+  it("falla con mes 00", () => {
+    expect(codigos(base({ tipoRegistro: 3, tipoComprobante: 208, fechaPeriodo: "00/2024" }))).toContain("V-007");
+  });
+
+  it("falla con mes 13", () => {
+    expect(codigos(base({ tipoRegistro: 3, tipoComprobante: 208, fechaPeriodo: "13/2024" }))).toContain("V-007");
+  });
+
+  it("no aplica para tipo 109 (Factura)", () => {
+    // No debe exigir fechaPeriodo para una factura normal
+    expect(codigos(base({ tipoComprobante: 109, fechaPeriodo: null }))).not.toContain("V-007");
+  });
+});
+
+// ── V-013 — Imputaciones ∈ {S, N} ────────────────────────────────────────
+
+describe("V-013 — imputaIva / imputaIre / imputaIrpRsp ∈ {S, N}", () => {
+  it("pasa cuando todas son S o N", () => {
+    expect(codigos(base({ imputaIva: "S", imputaIre: "N", imputaIrpRsp: "N" }))).not.toContain("V-013");
+  });
+
+  it('falla cuando imputaIva es "s" (minúscula)', () => {
+    expect(codigos(base({ imputaIva: "s" }))).toContain("V-013");
+  });
+
+  it('falla cuando imputaIre es cadena vacía', () => {
+    expect(codigos(base({ imputaIre: "" }))).toContain("V-013");
+  });
+
+  it('falla cuando imputaIrpRsp es "SI"', () => {
+    expect(codigos(base({ imputaIrpRsp: "SI" }))).toContain("V-013");
+  });
+
+  it("produce un error distinto por cada campo inválido", () => {
+    const errs = validarComprobante(base({ imputaIva: "x", imputaIre: "y", imputaIrpRsp: "z" }));
+    const v013 = errs.filter((e) => e.codigo === "V-013");
+    expect(v013.length).toBe(3);
+  });
+});
+
 // ── V-008 — Condición de operación ───────────────────────────────────────
 
 describe("V-008 — condicionOperacion ∈ {1,2} para tipo 109 (Factura)", () => {

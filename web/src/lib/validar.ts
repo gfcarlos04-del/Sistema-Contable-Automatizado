@@ -42,6 +42,7 @@ export interface ComprobanteParaValidar {
   tipoIdentificacionContraparte?: number | null;
   condicionOperacion?: number | null;
   operacionMonedaExtranjera?: string | null;
+  fechaPeriodo?: string | null; // MM/AAAA — para tipos 208 y 206
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -173,6 +174,45 @@ export function validarComprobante(c: ComprobanteParaValidar): ErrorValidacion[]
     }
   }
 
+  // V-007: Fecha período MM/AAAA ≥ 01/2021 — BLOQ — solo para tipos 206 y 208
+  if ([206, 208].includes(tipo)) {
+    if (!c.fechaPeriodo) {
+      errors.push({
+        codigo: "V-007",
+        mensaje: "La fecha de período (MM/AAAA) es obligatoria para este tipo de comprobante.",
+        severidad: "BLOQ",
+        campo: "fechaPeriodo",
+      });
+    } else {
+      if (!/^\d{2}\/\d{4}$/.test(c.fechaPeriodo)) {
+        errors.push({
+          codigo: "V-007",
+          mensaje: `La fecha de período debe tener el formato MM/AAAA (ej: 06/2024). Valor recibido: "${c.fechaPeriodo}".`,
+          severidad: "BLOQ",
+          campo: "fechaPeriodo",
+        });
+      } else {
+        const [mm, aaaa] = c.fechaPeriodo.split("/").map(Number);
+        const anio = aaaa;
+        const mes = mm;
+        const MIN_ANIO = 2021;
+        const MIN_MES = 1;
+        if (
+          mes < 1 || mes > 12 ||
+          anio < MIN_ANIO ||
+          (anio === MIN_ANIO && mes < MIN_MES)
+        ) {
+          errors.push({
+            codigo: "V-007",
+            mensaje: `La fecha de período debe ser ≥ 01/2021 y tener un mes válido (01–12). Valor recibido: "${c.fechaPeriodo}".`,
+            severidad: "BLOQ",
+            campo: "fechaPeriodo",
+          });
+        }
+      }
+    }
+  }
+
   // V-008: Condición de operación ∈ {1,2} — BLOQ — solo para tipo 109 (Factura)
   if (tipo === 109 && c.condicionOperacion != null) {
     if (c.condicionOperacion !== 1 && c.condicionOperacion !== 2) {
@@ -216,6 +256,22 @@ export function validarComprobante(c: ComprobanteParaValidar): ErrorValidacion[]
         codigo: "V-014",
         mensaje: "Debe seleccionar al menos una imputación (IVA, IRE, IRP-RSP o No Imputa).",
         severidad: "BLOQ",
+      });
+    }
+  }
+
+  // V-013: imputaIva, imputaIre, imputaIrpRsp ∈ {S, N} — BLOQ
+  for (const [campo, valor] of [
+    ["imputaIva", c.imputaIva],
+    ["imputaIre", c.imputaIre],
+    ["imputaIrpRsp", c.imputaIrpRsp],
+  ] as const) {
+    if (valor !== "S" && valor !== "N") {
+      errors.push({
+        codigo: "V-013",
+        mensaje: `El campo "${campo}" debe ser "S" o "N". Valor recibido: "${valor}".`,
+        severidad: "BLOQ",
+        campo,
       });
     }
   }
