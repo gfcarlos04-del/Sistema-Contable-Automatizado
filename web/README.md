@@ -48,4 +48,4 @@ correr `db:seed:e2e` **y** `test:e2e` con los mismos valores.
 ## Deploy
 
 CI (GitHub Actions) corre lint + typecheck + tests en todo push, y en `main`
-ejecuta `flyctl deploy`. App en **https://tavex.fly.dev**.
+ejecuta `flyctl deploy`. App en **https://marangatu-web.fly.dev**.
