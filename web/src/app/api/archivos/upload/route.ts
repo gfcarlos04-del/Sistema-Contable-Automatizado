@@ -9,6 +9,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { buildStorageKey, putObject } from "@/lib/storage";
 import { COLAS, getQueue } from "@/lib/queue";
+import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -34,6 +35,29 @@ export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  }
+
+  // Rate limit: 30 uploads por usuario por minuto.
+  // Protege contra bucles accidentales y abuso que vaciaría la cuota Gemini.
+  const rl = await rateLimit({
+    key: `upload:${session.user.id}`,
+    limit: 30,
+    windowSec: 60,
+  });
+  if (!rl.allowed) {
+    const retryAfter = Math.max(1, Math.ceil((rl.resetAt - Date.now()) / 1000));
+    return NextResponse.json(
+      {
+        error: `Demasiadas subidas. Intentá de nuevo en ${retryAfter} segundo(s).`,
+      },
+      {
+        status: 429,
+        headers: {
+          ...rateLimitHeaders(rl),
+          "Retry-After": String(retryAfter),
+        },
+      },
+    );
   }
 
   let formData: FormData;

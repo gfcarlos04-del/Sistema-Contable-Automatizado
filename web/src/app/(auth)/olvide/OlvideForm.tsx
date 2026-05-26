@@ -1,18 +1,36 @@
 "use client";
 
 import { useActionState } from "react";
-import { loginAction, type LoginResult } from "../actions";
+import { solicitarReset } from "./actions";
 
-const initial: LoginResult | null = null;
+type State = { ok: boolean; error?: string; sent?: boolean } | null;
 
-export function LoginForm() {
-  const [state, formAction, pending] = useActionState<LoginResult | null, FormData>(
-    async (_prev, formData) => loginAction(formData),
-    initial,
+export function OlvideForm() {
+  const [state, dispatch, pending] = useActionState(
+    async (_prev: State, formData: FormData): Promise<State> => {
+      const email = formData.get("email") as string;
+      const result = await solicitarReset(email);
+      if (result.ok) return { ok: true, sent: true };
+      return { ok: false, error: result.error };
+    },
+    null,
   );
 
+  if (state?.ok && state.sent) {
+    return (
+      <div className="mt-8 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+        <p className="font-medium">
+          Si el email existe, te enviamos un enlace para restablecer tu contraseña.
+        </p>
+        <p className="mt-2 text-xs text-emerald-700">
+          Revisá tu bandeja de entrada (y la carpeta de spam). El enlace vence en 60 minutos.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <form action={formAction} className="mt-8 space-y-5">
+    <form action={dispatch} className="mt-8 space-y-5">
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-gray-700">
           Email
@@ -23,31 +41,12 @@ export function LoginForm() {
           type="email"
           required
           autoComplete="email"
-          className="mt-1.5 w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+          className="mt-1.5 w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
           placeholder="tu@empresa.com"
         />
       </div>
 
-      <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-          Contraseña
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          required
-          autoComplete="current-password"
-          className="mt-1.5 w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-        />
-        <div className="mt-1.5 text-right">
-          <a href="/olvide" className="text-xs font-medium text-indigo-600 hover:text-indigo-500">
-            ¿Olvidaste tu contraseña?
-          </a>
-        </div>
-      </div>
-
-      {state && !state.ok && (
+      {state && !state.ok && state.error && (
         <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5">
           <svg
             className="h-4 w-4 shrink-0 text-red-500"
@@ -71,7 +70,7 @@ export function LoginForm() {
         disabled={pending}
         className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none disabled:opacity-50"
       >
-        {pending ? "Entrando…" : "Entrar"}
+        {pending ? "Enviando…" : "Enviar enlace de recuperación"}
       </button>
     </form>
   );
