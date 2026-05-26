@@ -887,6 +887,37 @@ describe("V-022 — identificadorEmpleador para tipo 206 (Extracto IPS)", () => 
   });
 });
 
+// ── C-005 — Moneda extranjera ─────────────────────────────────────────────
+
+describe('C-005 — advertencia moneda extranjera "S"', () => {
+  it('no dispara si operacionMonedaExtranjera="N"', () => {
+    expect(codigos(base({ operacionMonedaExtranjera: "N" }))).not.toContain("C-005");
+  });
+
+  it("no dispara si operacionMonedaExtranjera es null", () => {
+    expect(codigos(base({ operacionMonedaExtranjera: null }))).not.toContain("C-005");
+  });
+
+  it("no dispara si operacionMonedaExtranjera es undefined", () => {
+    const { operacionMonedaExtranjera: _, ...rest } = base();
+    expect(codigos(rest as ComprobanteParaValidar)).not.toContain("C-005");
+  });
+
+  it('dispara con severidad ADV si operacionMonedaExtranjera="S"', () => {
+    const errs = validarComprobante(base({ operacionMonedaExtranjera: "S" }));
+    const c005 = errs.find((e) => e.codigo === "C-005");
+    expect(c005).toBeDefined();
+    expect(c005?.severidad).toBe("ADV");
+  });
+
+  it("el mensaje menciona moneda y tipo de cambio", () => {
+    const errs = validarComprobante(base({ operacionMonedaExtranjera: "S" }));
+    const c005 = errs.find((e) => e.codigo === "C-005");
+    expect(c005?.mensaje.toLowerCase()).toMatch(/moneda/);
+    expect(c005?.mensaje.toLowerCase()).toMatch(/tipo de cambio/);
+  });
+});
+
 // ── K-001 — Baja confianza ────────────────────────────────────────────────
 
 describe("K-001 — Campo crítico baja confianza", () => {

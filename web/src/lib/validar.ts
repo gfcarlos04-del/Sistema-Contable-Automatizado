@@ -453,6 +453,17 @@ export function validarComprobante(c: ComprobanteParaValidar): ErrorValidacion[]
     }
   }
 
+  // C-005: Moneda extranjera "S" — recordar registrar moneda original y tipo de cambio — ADV
+  if (c.operacionMonedaExtranjera === "S") {
+    errors.push({
+      codigo: "C-005",
+      mensaje:
+        "La operación está en moneda extranjera. Recordá registrar la moneda original y el tipo de cambio en tus libros internos.",
+      severidad: "ADV",
+      campo: "operacionMonedaExtranjera",
+    });
+  }
+
   // C-001: IVA 10 coherencia — ADV
   const iva10 = toNumber(c.iva10);
   if (gravado10 > 0 && iva10 > 0) {

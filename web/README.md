@@ -45,6 +45,42 @@ correr `db:seed:e2e` **y** `test:e2e` con los mismos valores.
 ⚠️ El seed E2E **rechaza** ejecutarse si `DATABASE_URL` contiene `prod`,
 `production` o `live`. Para forzar (no recomendado): `ALLOW_E2E_SEED_IN_PROD=1`.
 
+## Recuperación de contraseña
+
+Las páginas `/olvide` y `/reset/[token]` permiten restablecer la contraseña.
+Los tokens viven **60 minutos** y se almacenan hasheados con SHA-256 en la DB.
+La página `/olvide` siempre responde "OK" (anti-enumeración de emails).
+
+**Para enviar emails reales** configurá Resend (3 000 emails/mes gratis en
+https://resend.com):
+
+```bash
+fly secrets set RESEND_API_KEY=re_xxxxxxxxxxxx -a tavex
+```
+
+Sin `RESEND_API_KEY`, el enlace de reset **se loguea a stdout** — visible con:
+
+```bash
+fly logs -a tavex
+```
+
+Esto permite desarrollar y hacer pruebas sin cuenta de Resend.
+
+## Rate limiting
+
+El endpoint `POST /api/archivos/upload` acepta **30 uploads por usuario por
+minuto**. Si se supera el límite devuelve HTTP `429` con los headers
+`X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset` y
+`Retry-After`.
+
+El helper vive en `src/lib/rate-limit.ts`. Si `REDIS_URL` está configurada usa
+Upstash Redis (persistente entre instancias); sin ella usa un contador en
+memoria del proceso (válido para desarrollo o instancia única).
+
+Para extender rate limiting a otro endpoint: importar `rateLimit` del
+helper y llamarlo al inicio del route handler con el identificador del usuario y
+el límite deseado.
+
 ## Deploy
 
 CI (GitHub Actions) corre lint + typecheck + tests en todo push, y en `main`
